@@ -32,9 +32,9 @@ export const ytSmartSearchHandler = async (
   try {
     // [1]: search as a video
     if (ytdl.validateURL(searchUrl)) {
-      // if (import.meta.env.DEV) {
-      console.log("Valid youtube video url ✅\n");
-      // }
+      if (import.meta.env.DEV) {
+        console.log("Valid youtube video url ✅\n");
+      }
 
       // video info
       const videoInfo = await ytdl.getInfo(searchUrl, {
@@ -56,9 +56,9 @@ export const ytSmartSearchHandler = async (
       });
       // [2]: search as playlist
     } else if (YouTube.validate(searchUrl, "PLAYLIST")) {
-      // if (import.meta.env.DEV) {
-      console.log("Valid youtube playlist url ✅\n");
-      // }
+      if (import.meta.env.DEV) {
+        console.log("Valid youtube playlist url ✅\n");
+      }
 
       const listInfo = await YouTube.getPlaylist(searchUrl, {
         fetchAll: true,
