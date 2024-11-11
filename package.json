@@ -3,10 +3,10 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "main": "./dist/app.js",
+  "main": "./api/index.js",
   "scripts": {
-    "clean": "rimraf ./dist",
-    "start": "node --no-deprecation ./dist/app.js",
+    "clean": "rimraf ./api",
+    "start": "node --no-deprecation ./api/app.js",
     "dev": "vite",
     "build": "vite build",
     "vercel-build": "echo building...",
