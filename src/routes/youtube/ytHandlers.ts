@@ -137,11 +137,11 @@ export const openDownloadSessionHandler = async (
   if (error) {
     // failed to open the session & create the session folder
     response.sendStatus(204);
+  } else {
+    const clientInfo = sessionReq.session.vidl.clientInfo;
+    saveInfoToJson(sessionReq.sessionID, clientInfo);
+    response.status(200).json(clientInfo);
   }
-
-  const clientInfo = sessionReq.session.vidl.clientInfo;
-  saveInfoToJson(sessionReq.sessionID, clientInfo);
-  response.status(200).json(clientInfo);
 };
 
 /** check connection & logs the session id before download start */
