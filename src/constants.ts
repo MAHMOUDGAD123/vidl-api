@@ -4,7 +4,7 @@ import type { SessionOptions } from "express-session";
 export const SESSION_LIFE = 10 * 60 * 1000; // 10 minutes [ 10(m) * 60(s) * 1000(ms) ]
 
 export const CORS_OPTIONS: CorsOptions = {
-  origin: import.meta.env.DEV ? true : "https://vidl-client.vercel.app",
+  origin: true,
   credentials: true,
   methods: ["GET", "POST"],
   optionsSuccessStatus: 200,
