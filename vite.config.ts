@@ -1,0 +1,26 @@
+import { defineConfig, type CorsOptions, type UserConfig } from "vite";
+import { vitePluginNode } from "./plugins/vite-node-plugin";
+import { viteMockServerPlugin } from "./plugins/vite-mock-server-plugin";
+import { CORS_OPTIONS } from "./src/constants";
+
+export default defineConfig({
+  base: "./",
+  esbuild: {
+    format: "esm",
+    minifyWhitespace: true,
+  },
+  build: {
+    minify: "esbuild",
+  },
+  preview: {
+    port: 3000,
+    cors: CORS_OPTIONS as CorsOptions,
+  },
+  server: {
+    // vite server configs, for details see [vite doc](https://vitejs.dev/config/#server-host)
+    hmr: true,
+    port: 3000,
+    cors: CORS_OPTIONS as CorsOptions,
+  },
+  plugins: [...vitePluginNode(), viteMockServerPlugin()],
+} satisfies UserConfig);
