@@ -11,7 +11,6 @@ export default defineConfig({
   },
   build: {
     minify: "esbuild",
-    outDir: "./api",
   },
   preview: {
     port: 3000,
