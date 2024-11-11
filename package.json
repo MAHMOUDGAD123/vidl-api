@@ -3,12 +3,13 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "main": "./index.js",
+  "main": "./dist/index.js",
   "scripts": {
-    "clean": "rimraf ./index.js",
-    "start": "node ./index.js",
+    "clean": "rimraf ./dist",
+    "start": "node --no-deprecation ./dist/index.js",
     "dev": "vite",
     "build": "vite build",
+    "vercel-build": "echo 'vercel building...💩'",
     "esbuild:build": "npm run clean && node ./esbuild.config.mjs",
     "nodemon:dev": "nodemon"
   },
