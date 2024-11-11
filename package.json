@@ -6,7 +6,7 @@
   "main": "./index.js",
   "scripts": {
     "clean": "rimraf ./index.js",
-    "start": "node --no-deprecation ./index.js",
+    "start": "node ./index.js",
     "dev": "vite",
     "build": "vite build",
     "esbuild:build": "npm run clean && node ./esbuild.config.mjs",
