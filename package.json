@@ -6,7 +6,7 @@
   "main": "./dist/app.js",
   "scripts": {
     "clean": "rimraf ./dist",
-    "start": "node ./dist/app.js",
+    "start": "node --no-deprecation ./dist/app.js",
     "dev": "vite",
     "build": "vite build",
     "vercel-build": "echo building...",
