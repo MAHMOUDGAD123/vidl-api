@@ -16,6 +16,7 @@ import {
   getAudioFormat_safe,
   getVideoFormat_safe,
 } from "./ytHelpers";
+import { agent } from "../../constants";
 
 // fix ffmpeg path error
 ffmpeg.setFfmpegPath(ffmpegPath);
@@ -39,6 +40,7 @@ export const ytSmartSearchHandler = async (
       // video info
       const videoInfo = await ytdl.getInfo(searchUrl, {
         playerClients: ["IOS"],
+        agent,
       });
       const formats = videoInfo.formats;
 
@@ -282,7 +284,10 @@ export const ytVideoDownloadHandler = async (
     }
 
     // video info
-    const videoInfo = await ytdl.getInfo(searchUrl, { playerClients: ["IOS"] });
+    const videoInfo = await ytdl.getInfo(searchUrl, {
+      playerClients: ["IOS"],
+      agent,
+    });
     const formats = videoInfo.formats;
 
     // filtered formats
@@ -446,7 +451,10 @@ export const ytAudioDownloadHandler = async (
     }
 
     // video info
-    const videoInfo = await ytdl.getInfo(searchUrl, { playerClients: ["IOS"] });
+    const videoInfo = await ytdl.getInfo(searchUrl, {
+      playerClients: ["IOS"],
+      agent,
+    });
     const formats = videoInfo.formats;
 
     // filtered formats
