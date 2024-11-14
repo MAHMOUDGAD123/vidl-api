@@ -142,7 +142,7 @@ export const openDownloadSessionHandler = async (
   } else {
     const clientInfo = sessionReq.session.vidl.clientInfo;
     saveInfoToJson(sessionReq.sessionID, clientInfo);
-    response.json(clientInfo);
+    response.status(200).json(clientInfo);
   }
 };
 
