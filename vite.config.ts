@@ -1,7 +1,7 @@
 import { defineConfig, type CorsOptions, type UserConfig } from "vite";
 import { vitePluginNode } from "./plugins/vite-node-plugin";
 import { viteMockServerPlugin } from "./plugins/vite-mock-server-plugin";
-import { CORS_OPTIONS } from "./src/constants";
+import { CORS_OPTIONS } from "./src/utils/constants";
 
 export default defineConfig({
   base: "./",

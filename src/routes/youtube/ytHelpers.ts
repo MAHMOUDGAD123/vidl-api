@@ -2,8 +2,11 @@ import ytdl from "@distube/ytdl-core";
 import type { yt } from "../../types/youtube-types";
 import fs, { existsSync } from "fs";
 import path from "path";
-import { tempFolderPath } from "../../constants";
-import { fileURLToPath } from "url";
+import { tempFolderName } from "../../utils/constants";
+
+const tempFolderPath = import.meta.env.DEV
+  ? tempFolderName
+  : `/${tempFolderName}`;
 
 /**
  * filter the (info.formats) and get all qualities:
@@ -230,20 +233,11 @@ export const createTempFolder = (
   sessionID: string
 ): { newPath: string; error: boolean } => {
   const newPath = path.resolve(targetPath, sessionID);
-  // console.log("newPath:", newPath);
-  const testPaths = [
-    path.resolve("/"),
-    path.resolve("var"),
-    path.resolve("task"),
-    import.meta.dirname,
-    process.cwd(),
-    path.dirname(fileURLToPath(import.meta.url)),
-  ];
+  const testPaths = [path.resolve("/")];
 
   testPaths.forEach((test) => {
     console.log("------------------------------------");
     console.log(test);
-    console.log("temp exists:", existsSync(`${test}/temp`));
     console.log("tmp exists:", existsSync(`${test}/tmp`));
     console.log("------------------------------------");
   });

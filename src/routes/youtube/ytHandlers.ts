@@ -16,7 +16,11 @@ import {
   getAudioFormat_safe,
   getVideoFormat_safe,
 } from "./ytHelpers";
-import { agent, tempFolderPath } from "../../constants";
+import { agent, tempFolderName } from "../../utils/constants";
+
+const tempFolderPath = import.meta.env.DEV
+  ? tempFolderName
+  : `/${tempFolderName}`;
 
 // fix ffmpeg path error
 ffmpeg.setFfmpegPath(ffmpegPath);
