@@ -104,53 +104,49 @@ export const openDownloadSessionHandler = async (
 ) => {
   const sessionReq = request as typeof request & yt.Progress.RequestSessionType;
 
-  try {
-    if (sessionReq.session.vidl) {
-      if (import.meta.env.DEV) {
-        console.log("Session already opened 🟩");
-      }
-    } else {
-      if (import.meta.env.DEV) {
-        console.log("not connected 🥺");
-      }
-      // init the session data
-      sessionReq.session.vidl = {
-        connected: true,
-        clientInfo: { state: "fetch", msg: "fetching info", progress: 0 },
-        progressState: {
-          duration: "",
-          downloadProgressState: {
-            total: 0, // total files to download
-            finish: 0, // downloaded files
-          },
-          mergeProgressState: {
-            size: 0,
-            timeMark: "",
-          },
+  if (sessionReq.session.vidl) {
+    if (import.meta.env.DEV) {
+      console.log("Session already opened 🟩");
+    }
+  } else {
+    if (import.meta.env.DEV) {
+      console.log("not connected 🥺");
+    }
+    // init the session data
+    sessionReq.session.vidl = {
+      connected: true,
+      clientInfo: { state: "fetch", msg: "fetching info", progress: 0 },
+      progressState: {
+        duration: "",
+        downloadProgressState: {
+          total: 0, // total files to download
+          finish: 0, // downloaded files
         },
-      };
-      if (import.meta.env.DEV) {
-        console.log("Download Session opened 🟩");
-      }
+        mergeProgressState: {
+          size: 0,
+          timeMark: "",
+        },
+      },
+    };
+    if (import.meta.env.DEV) {
+      console.log("Download Session opened 🟩");
     }
+  }
 
-    // create the session temporary folder in (/temp)
-    const { error } = createTempFolder("temp", request.sessionID);
+  // create the session temporary folder in (/temp)
+  const { error } = createTempFolder("temp", request.sessionID);
 
-    if (error) {
-      // failed to open the session & create the session folder
-      response.sendStatus(204).json({
-        state: "error",
-        msg: "failed to open the session temp folder",
-        progress: 0,
-      });
-    } else {
-      const clientInfo = sessionReq.session.vidl.clientInfo;
-      saveInfoToJson(sessionReq.sessionID, clientInfo);
-      response.status(200).json(clientInfo);
-    }
-  } catch (err) {
-    console.log(err);
+  if (error) {
+    // failed to open the session & create the session folder
+    response.status(204).json({
+      state: "error",
+      msg: "failed to open the session temp folder",
+      progress: 0,
+    });
+  } else {
+    const clientInfo = sessionReq.session.vidl.clientInfo;
+    saveInfoToJson(sessionReq.sessionID, clientInfo);
+    response.status(200).json(clientInfo);
   }
 };
 
