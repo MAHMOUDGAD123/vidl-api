@@ -232,9 +232,12 @@ export const createTempFolder = (
   const newPath = path.resolve(targetPath, sessionID);
   // console.log("newPath:", newPath);
   const testPaths = [
+    path.resolve("/"),
+    path.resolve("var"),
+    path.resolve("task"),
     import.meta.dirname,
     process.cwd(),
-    fileURLToPath(import.meta.url),
+    path.dirname(fileURLToPath(import.meta.url)),
   ];
 
   testPaths.forEach((test) => {
