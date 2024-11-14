@@ -181,8 +181,6 @@ export const getSessionProgressHandler = async (
 ) => {
   const sessionReq = request as typeof request & yt.Progress.RequestSessionType;
 
-  response.setHeader("Access-Control-Allow-Origin", "*");
-
   if (sessionReq.session.vidl) {
     const filePath = path.resolve(
       tempFolderPath,
