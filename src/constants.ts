@@ -1,11 +1,9 @@
 import ytdl from "@distube/ytdl-core";
 import type { CorsOptions } from "cors";
 import type { SessionOptions } from "express-session";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
 
 export const SESSION_LIFE = 10 * 60 * 1000; // 10 minutes [ 10(m) * 60(s) * 1000(ms) ]
-export const tempFolderPath = `${dirname(fileURLToPath(import.meta.url))}/temp`;
+export const tempFolderPath = "api/temp";
 
 export const agent = ytdl.createAgent([
   {

@@ -228,9 +228,8 @@ export const createTempFolder = (
   targetPath: string,
   sessionID: string
 ): { newPath: string; error: boolean } => {
-  const newPath = path.join(targetPath, sessionID);
+  const newPath = path.resolve(targetPath, sessionID);
   console.log("newPath:", newPath);
-
   console.log("temp exists:", existsSync(targetPath));
 
   try {
@@ -255,7 +254,7 @@ export const createTempFolder = (
 
 /** used to save progress client info to json file */
 export const saveInfoToJson = (sessionID: string, data: any) => {
-  const filePath = path.join(tempFolderPath, sessionID, "info.json");
+  const filePath = path.resolve(tempFolderPath, sessionID, "info.json");
 
   try {
     fs.writeFileSync(filePath, JSON.stringify(data), {
