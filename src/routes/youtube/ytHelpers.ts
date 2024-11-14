@@ -1,8 +1,9 @@
 import ytdl from "@distube/ytdl-core";
 import type { yt } from "../../types/youtube-types";
 import fs, { existsSync } from "fs";
-import path from "path";
+import path, { dirname } from "path";
 import { tempFolderPath } from "../../constants";
+import { fileURLToPath } from "url";
 
 /**
  * filter the (info.formats) and get all qualities:
@@ -230,6 +231,7 @@ export const createTempFolder = (
 ): { newPath: string; error: boolean } => {
   const newPath = path.join(targetPath, sessionID);
   console.log("newPath:", newPath);
+  console.log(dirname(fileURLToPath(import.meta.url)));
 
   try {
     if (existsSync(newPath)) {
