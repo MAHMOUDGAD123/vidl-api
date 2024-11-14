@@ -253,14 +253,14 @@ export const downloadSessionCleaner = async (
     });
     // remove the whole tmp folder
     rm(tempFolder, { recursive: true, force: true }, (err) => {
-      // if (import.meta.env.DEV) {
-      if (err) {
-        console.error(`Faild to delete the tmp folder ❓ -> ${err.message}`);
-      } else {
-        console.log("Temp folder deleted successfully ✅");
+      if (import.meta.env.DEV) {
+        if (err) {
+          console.error(`Faild to delete the tmp folder ❓ -> ${err.message}`);
+        } else {
+          console.log("Temp folder deleted successfully ✅");
+        }
+        console.log("\n============== End ===============");
       }
-      console.log("\n============== End ===============");
-      // }
     });
   });
 
