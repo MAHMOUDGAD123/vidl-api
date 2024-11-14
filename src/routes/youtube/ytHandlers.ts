@@ -155,7 +155,7 @@ export const downloadSessionInfoLogger = async (
   const sessionReq = request as typeof request & yt.Progress.RequestSessionType;
 
   if (import.meta.env.DEV) {
-    console.clear();
+    // console.clear();
     console.log("\n======= Session Info Start =======\n");
 
     if (sessionReq.session.vidl) {
@@ -178,7 +178,7 @@ export const getSessionProgressHandler = async (
   const sessionReq = request as typeof request & yt.Progress.RequestSessionType;
 
   if (sessionReq.session.vidl) {
-    const filePath = path.resolve(
+    const filePath = path.join(
       tempFolderPath,
       sessionReq.sessionID,
       "info.json"
@@ -230,7 +230,7 @@ export const downloadSessionCleaner = async (
   response.on("finish", () => {
     const sessionReq = request as typeof request &
       yt.Progress.RequestSessionType;
-    const tempFolder = path.resolve(tempFolderPath, sessionReq.sessionID);
+    const tempFolder = path.join(tempFolderPath, sessionReq.sessionID);
 
     if (import.meta.env.DEV) {
       console.log("\nCleaner 🧹🧹🧹🧹🧹");
@@ -329,12 +329,12 @@ export const ytVideoDownloadHandler = async (
     // set file count to (2 files)
     sessionReq.session.vidl.progressState.downloadProgressState.total = 2;
 
-    const tempFolder = path.resolve(tempFolderPath, request.sessionID);
-    const videoFilePath = path.resolve(
+    const tempFolder = path.join(tempFolderPath, request.sessionID);
+    const videoFilePath = path.join(
       tempFolder,
       `video.${targetFormat.container}`
     );
-    const audioFilePath = path.resolve(
+    const audioFilePath = path.join(
       tempFolder,
       `audio.${audioFormat.container}`
     );
@@ -355,7 +355,7 @@ export const ytVideoDownloadHandler = async (
       return;
     }
 
-    const outFilePath = path.resolve(tempFolder, `output.mp4`);
+    const outFilePath = path.join(tempFolder, `output.mp4`);
 
     // merge video & audio in one file
     ffmpeg(videoFilePath)
@@ -480,8 +480,8 @@ export const ytAudioDownloadHandler = async (
     // set file count to (1 files)
     sessionReq.session.vidl.progressState.downloadProgressState.total = 1;
 
-    const tempFolder = path.resolve(tempFolderPath, request.sessionID);
-    const audioFilePath = path.resolve(
+    const tempFolder = path.join(tempFolderPath, request.sessionID);
+    const audioFilePath = path.join(
       tempFolder,
       `audio.${targetFormat.container}`
     );
@@ -504,7 +504,7 @@ export const ytAudioDownloadHandler = async (
       return;
     }
 
-    const outFilePath = path.resolve(tempFolder, `output.mp3`);
+    const outFilePath = path.join(tempFolder, `output.mp3`);
 
     // merge video & audio in one file
     ffmpeg(audioFilePath)
