@@ -230,7 +230,7 @@ export const agent = ytdl.createAgent([
 ]);
 
 export const CORS_OPTIONS: CorsOptions = {
-  origin: "https://vidl-client.vercel.app",
+  origin: true,
   credentials: true,
   methods: ["GET", "POST"],
   optionsSuccessStatus: 200,
