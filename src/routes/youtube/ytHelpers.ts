@@ -2,6 +2,7 @@ import ytdl from "@distube/ytdl-core";
 import type { yt } from "../../types/youtube-types";
 import fs, { existsSync } from "fs";
 import path from "path";
+import { tempFolderPath } from "../../constants";
 
 /**
  * filter the (info.formats) and get all qualities:
@@ -251,7 +252,7 @@ export const createTempFolder = (
 
 /** used to save progress client info to json file */
 export const saveInfoToJson = (sessionID: string, data: any) => {
-  const filePath = path.resolve("temp", sessionID, "info.json");
+  const filePath = path.resolve(tempFolderPath, sessionID, "info.json");
 
   try {
     fs.writeFileSync(filePath, JSON.stringify(data), {

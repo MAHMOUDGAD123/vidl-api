@@ -16,7 +16,7 @@ import {
   getAudioFormat_safe,
   getVideoFormat_safe,
 } from "./ytHelpers";
-import { agent } from "../../constants";
+import { agent, tempFolderPath } from "../../constants";
 
 // fix ffmpeg path error
 ffmpeg.setFfmpegPath(ffmpegPath);
@@ -134,7 +134,7 @@ export const openDownloadSessionHandler = async (
   }
 
   // create the session temporary folder in (/temp)
-  const { error } = createTempFolder("temp", request.sessionID);
+  const { error } = createTempFolder(tempFolderPath, request.sessionID);
 
   if (error) {
     // failed to open the session & create the session folder
@@ -178,7 +178,11 @@ export const getSessionProgressHandler = async (
   const sessionReq = request as typeof request & yt.Progress.RequestSessionType;
 
   if (sessionReq.session.vidl) {
-    const filePath = path.resolve("temp", sessionReq.sessionID, "info.json");
+    const filePath = path.resolve(
+      tempFolderPath,
+      sessionReq.sessionID,
+      "info.json"
+    );
 
     try {
       fs.readFile(filePath, { encoding: "utf-8" }, (err, data) => {
@@ -226,7 +230,7 @@ export const downloadSessionCleaner = async (
   response.on("finish", () => {
     const sessionReq = request as typeof request &
       yt.Progress.RequestSessionType;
-    const tempFolder = path.resolve("temp", sessionReq.sessionID);
+    const tempFolder = path.resolve(tempFolderPath, sessionReq.sessionID);
 
     if (import.meta.env.DEV) {
       console.log("\nCleaner 🧹🧹🧹🧹🧹");
@@ -325,7 +329,7 @@ export const ytVideoDownloadHandler = async (
     // set file count to (2 files)
     sessionReq.session.vidl.progressState.downloadProgressState.total = 2;
 
-    const tempFolder = path.resolve("temp", request.sessionID);
+    const tempFolder = path.resolve(tempFolderPath, request.sessionID);
     const videoFilePath = path.resolve(
       tempFolder,
       `video.${targetFormat.container}`
@@ -476,7 +480,7 @@ export const ytAudioDownloadHandler = async (
     // set file count to (1 files)
     sessionReq.session.vidl.progressState.downloadProgressState.total = 1;
 
-    const tempFolder = path.resolve("temp", request.sessionID);
+    const tempFolder = path.resolve(tempFolderPath, request.sessionID);
     const audioFilePath = path.resolve(
       tempFolder,
       `audio.${targetFormat.container}`
