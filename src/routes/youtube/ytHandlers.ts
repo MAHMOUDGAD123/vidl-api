@@ -137,7 +137,7 @@ export const openDownloadSessionHandler = async (
     }
   }
 
-  // create the session temporary folder in (/temp)
+  // create the session temporary folder in (/tmp)
   const { error } = createTempFolder(tempFolderPath, request.sessionID);
 
   if (error) {
@@ -251,16 +251,16 @@ export const downloadSessionCleaner = async (
         }
       }
     });
-    // remove the whole temp folder
+    // remove the whole tmp folder
     rm(tempFolder, { recursive: true, force: true }, (err) => {
-      if (import.meta.env.DEV) {
-        if (err) {
-          console.error(`Faild to delete the temp folder ❓ -> ${err.message}`);
-        } else {
-          console.log("Temp folder deleted successfully ✅");
-        }
-        console.log("\n============== End ===============");
+      // if (import.meta.env.DEV) {
+      if (err) {
+        console.error(`Faild to delete the tmp folder ❓ -> ${err.message}`);
+      } else {
+        console.log("Temp folder deleted successfully ✅");
       }
+      console.log("\n============== End ===============");
+      // }
     });
   });
 

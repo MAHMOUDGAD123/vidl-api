@@ -233,24 +233,16 @@ export const createTempFolder = (
   sessionID: string
 ): { newPath: string; error: boolean } => {
   const newPath = path.resolve(targetPath, sessionID);
-  const testPaths = [path.resolve("/")];
-
-  testPaths.forEach((test) => {
-    console.log("------------------------------------");
-    console.log(test);
-    console.log("tmp exists:", existsSync(`${test}/tmp`));
-    console.log("------------------------------------");
-  });
 
   try {
     if (existsSync(newPath)) {
-      console.log(`[${newPath}] folder already exists ❓`);
       if (import.meta.env.DEV) {
+        console.log(`[${newPath}] folder already exists ❓`);
       }
     } else {
       fs.mkdirSync(newPath, { recursive: true });
-      console.log(`Session folder created successfully ✅ [${newPath}]`);
       if (import.meta.env.DEV) {
+        console.log(`Session folder created successfully ✅ [${newPath}]`);
       }
     }
   } catch (err) {
