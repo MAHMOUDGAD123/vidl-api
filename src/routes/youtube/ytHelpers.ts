@@ -232,20 +232,20 @@ export const createTempFolder = (
 
   try {
     if (existsSync(newPath)) {
+      console.log(`[${newPath}] folder already exists ❓`);
       if (import.meta.env.DEV) {
-        console.log(`[${newPath}] folder already exists ❓`);
       }
     } else {
       fs.mkdirSync(newPath, { recursive: true });
+      console.log(`Session folder created successfully ✅ [${newPath}]`);
       if (import.meta.env.DEV) {
-        console.log(`Session folder created successfully ✅ [${newPath}]`);
       }
     }
   } catch (err) {
-    console.log("folder created ✅");
+    console.log("failed to create folder ❌");
     return { newPath, error: true };
   }
-  console.log("failed to create folder ❌");
+  console.log("folder created ✅");
   return { newPath, error: false };
 };
 
