@@ -3,6 +3,7 @@ import type { yt } from "../../types/youtube-types";
 import fs, { existsSync } from "fs";
 import path from "path";
 import { tempFolderPath } from "../../constants";
+import { fileURLToPath } from "url";
 
 /**
  * filter the (info.formats) and get all qualities:
@@ -229,8 +230,20 @@ export const createTempFolder = (
   sessionID: string
 ): { newPath: string; error: boolean } => {
   const newPath = path.resolve(targetPath, sessionID);
-  console.log("newPath:", newPath);
-  console.log("temp exists:", existsSync(targetPath));
+  // console.log("newPath:", newPath);
+  const testPaths = [
+    import.meta.dirname,
+    process.cwd(),
+    fileURLToPath(import.meta.url),
+  ];
+
+  testPaths.forEach((test) => {
+    console.log("------------------------------------");
+    console.log(test);
+    console.log("temp exists:", existsSync(`${test}/temp`));
+    console.log("tmp exists:", existsSync(`${test}/tmp`));
+    console.log("------------------------------------");
+  });
 
   try {
     if (existsSync(newPath)) {
