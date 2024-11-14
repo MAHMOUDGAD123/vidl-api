@@ -227,10 +227,9 @@ export const createTempFolder = (
   targetPath: string,
   sessionID: string
 ): { newPath: string; error: boolean } => {
-  let newPath = "";
-  try {
-    newPath = path.resolve(targetPath, sessionID);
+  const newPath = path.resolve(targetPath, sessionID);
 
+  try {
     if (existsSync(newPath)) {
       if (import.meta.env.DEV) {
         console.log(`[${newPath}] folder already exists ❓`);
