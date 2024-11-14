@@ -138,15 +138,11 @@ export const openDownloadSessionHandler = async (
 
   if (error) {
     // failed to open the session & create the session folder
-    response.status(204).json({
-      state: "error",
-      msg: "failed to open the session temp folder",
-      progress: 0,
-    });
+    response.sendStatus(204);
   } else {
     const clientInfo = sessionReq.session.vidl.clientInfo;
     saveInfoToJson(sessionReq.sessionID, clientInfo);
-    response.status(200).json(clientInfo);
+    response.json(clientInfo);
   }
 };
 
