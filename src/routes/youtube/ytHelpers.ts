@@ -230,15 +230,14 @@ export const createTempFolder = (
   const newPath = path.resolve(targetPath, sessionID);
   try {
     if (existsSync(newPath)) {
-      // if (import.meta.env.DEV) {
-      console.log(`[${newPath}] folder already exists ❓`);
-      // }
+      if (import.meta.env.DEV) {
+        console.log(`[${newPath}] folder already exists ❓`);
+      }
     } else {
-      // fs.mkdirSync(newPath, { recursive: true });
-      fs.mkdirSync(newPath);
-      // if (import.meta.env.DEV) {
-      console.log(`Session folder created successfully ✅ [${newPath}]`);
-      // }
+      fs.mkdirSync(newPath, { recursive: true });
+      if (import.meta.env.DEV) {
+        console.log(`Session folder created successfully ✅ [${newPath}]`);
+      }
     }
   } catch (err) {
     return { newPath, error: true };
