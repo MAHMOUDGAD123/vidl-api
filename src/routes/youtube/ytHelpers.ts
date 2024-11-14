@@ -228,6 +228,7 @@ export const createTempFolder = (
   sessionID: string
 ): { newPath: string; error: boolean } => {
   const newPath = path.resolve(targetPath, sessionID);
+  console.log("newPath:", newPath);
   try {
     if (existsSync(newPath)) {
       if (import.meta.env.DEV) {
