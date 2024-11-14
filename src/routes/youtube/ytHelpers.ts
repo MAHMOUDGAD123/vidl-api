@@ -242,8 +242,10 @@ export const createTempFolder = (
       }
     }
   } catch (err) {
+    console.log("folder created ✅");
     return { newPath, error: true };
   }
+  console.log("failed to create folder ❌");
   return { newPath, error: false };
 };
 
