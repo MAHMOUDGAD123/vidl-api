@@ -3,7 +3,7 @@ import type { CorsOptions } from "cors";
 import type { SessionOptions } from "express-session";
 
 export const SESSION_LIFE = 10 * 60 * 1000; // 10 minutes [ 10(m) * 60(s) * 1000(ms) ]
-export const tempFolderPath = "api/temp";
+export const tempFolderPath = "tmp";
 
 export const agent = ytdl.createAgent([
   {
