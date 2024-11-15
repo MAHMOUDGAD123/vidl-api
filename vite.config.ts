@@ -5,6 +5,7 @@ import { CORS_OPTIONS } from "./src/utils/constants";
 
 export default defineConfig({
   base: "./",
+  publicDir: false,
   esbuild: {
     format: "esm",
     minifyWhitespace: true,
