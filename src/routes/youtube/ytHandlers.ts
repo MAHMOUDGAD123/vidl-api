@@ -470,12 +470,14 @@ export const ytAudioDownloadHandler = async (
       getAudioFormats(formats),
       quality as yt.AudioQualities
     );
+    console.log("filter ok ✅");
 
     if (targetFormat === null) {
       console.log("video not exist ❌");
       if (import.meta.env.DEV) {
       }
-      throw ""; // this is kind of impossible 😱❓
+      response.sendStatus(204);
+      return; // this is kind of impossible 😱❓
     }
 
     const sessionReq = request as typeof request &
@@ -484,11 +486,15 @@ export const ytAudioDownloadHandler = async (
     // set file count to (1 files)
     sessionReq.session.vidl.progressState.downloadProgressState.total = 1;
 
+    console.log("update session ok ✅");
+
     const tempFolder = path.resolve(tempFolderPath, request.sessionID);
     const audioFilePath = path.resolve(
       tempFolder,
       `audio.${targetFormat.container}`
     );
+
+    console.log("resolve paths ok ✅");
 
     // download
     // -----------------------------------------------------
@@ -507,6 +513,7 @@ export const ytAudioDownloadHandler = async (
       response.sendStatus(204);
       return;
     }
+    console.log("download file ok ok ✅");
 
     const outFilePath = path.resolve(tempFolder, `output.mp3`);
 
@@ -571,6 +578,7 @@ export const ytAudioDownloadHandler = async (
         response.sendStatus(204);
       });
   } catch (err) {
+    console.log((err as Error).message, "❓");
     response.sendStatus(204);
   }
 };
