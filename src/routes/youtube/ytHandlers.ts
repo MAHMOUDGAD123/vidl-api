@@ -454,8 +454,8 @@ export const ytAudioDownloadHandler = async (
       return;
     }
 
+    console.log("video url is valid ✅\n");
     if (import.meta.env.DEV) {
-      console.log("video url is valid ✅\n");
     }
 
     // video info
@@ -472,8 +472,8 @@ export const ytAudioDownloadHandler = async (
     );
 
     if (targetFormat === null) {
+      console.log("video not exist ❌");
       if (import.meta.env.DEV) {
-        console.log("video not exist ❌");
       }
       throw ""; // this is kind of impossible 😱❓
     }
@@ -492,8 +492,8 @@ export const ytAudioDownloadHandler = async (
 
     // download
     // -----------------------------------------------------
+    console.log("\n============= Start ==============\n");
     if (import.meta.env.DEV) {
-      console.log("\n============= Start ==============\n");
     }
 
     const audioFileStatus = (await downloadFile(
@@ -516,8 +516,8 @@ export const ytAudioDownloadHandler = async (
       .audioBitrate(targetFormat.audioBitrate!)
       .saveToFile(outFilePath)
       .on("start", () => {
+        console.log("start converting... ⚒️");
         if (import.meta.env.DEV) {
-          console.log("start converting... ⚒️");
         }
       })
       .on("codecData", (codecData) => {
@@ -565,8 +565,8 @@ export const ytAudioDownloadHandler = async (
         });
       })
       .on("error", (err) => {
+        console.error(`Faied to send file to the user ❌ -> ${err.message}`);
         if (import.meta.env.DEV) {
-          console.error(`Faied to send file to the user ❌ -> ${err.message}`);
         }
         response.sendStatus(204);
       });
