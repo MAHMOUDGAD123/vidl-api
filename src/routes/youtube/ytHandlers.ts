@@ -159,7 +159,7 @@ export const downloadSessionInfoLogger = async (
   const sessionReq = request as typeof request & yt.Progress.RequestSessionType;
 
   if (import.meta.env.DEV) {
-    // console.clear();
+    console.clear();
     console.log("\n======= Session Info Start =======\n");
 
     if (sessionReq.session.vidl) {
@@ -486,15 +486,11 @@ export const ytAudioDownloadHandler = async (
     // set file count to (1 files)
     sessionReq.session.vidl.progressState.downloadProgressState.total = 1;
 
-    console.log("update session ok ✅");
-
     const tempFolder = path.resolve(tempFolderPath, request.sessionID);
     const audioFilePath = path.resolve(
       tempFolder,
       `audio.${targetFormat.container}`
     );
-
-    console.log("resolve paths ok ✅");
 
     // download
     // -----------------------------------------------------
@@ -513,7 +509,6 @@ export const ytAudioDownloadHandler = async (
       response.sendStatus(204);
       return;
     }
-    console.log("download file ok ok ✅");
 
     const outFilePath = path.resolve(tempFolder, `output.mp3`);
 

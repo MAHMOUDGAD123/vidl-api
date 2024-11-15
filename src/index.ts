@@ -3,6 +3,7 @@ import cors from "cors";
 import routes from "./routes/router";
 import cookieParser from "cookie-parser";
 import session from "express-session";
+// import session from "cookie-session";
 import { CORS_OPTIONS, SESSION_CONFIG } from "./utils/constants";
 
 const app: Express = express();

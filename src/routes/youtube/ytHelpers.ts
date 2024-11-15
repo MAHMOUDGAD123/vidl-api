@@ -331,7 +331,7 @@ export const updateSessionProgress = (
   }
 
   if (import.meta.env.DEV) {
-    // console.clear();
+    console.clear();
     console.log("---------------------------------------------");
     console.log("progress-state:", sessionReq.session.vidl.progressState);
     console.log("client-info:", sessionReq.session.vidl.clientInfo);
