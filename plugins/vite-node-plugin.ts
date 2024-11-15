@@ -26,7 +26,7 @@ export const vitePluginNode = () =>
     // 'swc' compiler is supported to use as well for frameworks
     // like Nestjs (esbuild dont support 'emitDecoratorMetadata' yet)
     // you need to INSTALL `@swc/core` as dev dependency if you want to use swc
-    tsCompiler: "swc",
+    tsCompiler: "esbuild",
 
     // Optional, default: {
     // jsc: {

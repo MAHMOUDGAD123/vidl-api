@@ -25,6 +25,7 @@ export const getVideoFormats = (
 
     const matches =
       filter.hasVideo &&
+      !filter.hasAudio &&
       !URL.parse(filter.url)!.hostname.includes("manifest") && // remove the manifest links
       (is8k || is2kOr4k || (!is8k && !is2kOr4k));
 
@@ -61,7 +62,7 @@ export const getAudioFormats = (
 
   return ytdl
     .filterFormats(infoFormats, (filter) => {
-      const matches = filter.hasAudio;
+      const matches = filter.hasAudio && !filter.hasVideo;
 
       const key = filter.audioBitrate;
       const isAdded = done_set.has(key);
