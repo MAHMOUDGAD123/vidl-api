@@ -1,13 +1,9 @@
 import ytdl from "@distube/ytdl-core";
 import fs from "fs";
 import path from "path";
-import { tempFolderName } from "../../utils/constants";
 import type { yt } from "../../types/youtube-types";
 import { SessionInfo } from "../../utils/classes";
-
-const tempFolderPath = import.meta.env.DEV
-  ? tempFolderName
-  : `/${tempFolderName}`;
+import { tempFolderPath, VITE_MODE } from "./ytHandlers";
 
 /**
  * filter the (info.formats) and get all qualities:
@@ -247,14 +243,14 @@ export const createSessionFolder = (
     } else {
       fs.mkdirSync(sessionFolderPath, { recursive: true });
 
-      if (import.meta.env.DEV) {
+      if (VITE_MODE) {
         console.log(
           `🟩 Session folder created successfully [${sessionFolderPath}]`
         );
       }
     }
   } catch (err) {
-    if (import.meta.env.DEV) {
+    if (VITE_MODE) {
       console.log(`🟥 ERROR: ${(err as Error).message}`);
       console.log("🟥 Failed to create session folder");
     }
@@ -276,11 +272,11 @@ export const saveInfoToJson = (
       encoding: "utf-8",
     });
 
-    if (import.meta.env.DEV) {
+    if (VITE_MODE) {
       console.log("🟩 Write client info succesfully to (info.json)");
     }
   } catch (err) {
-    if (import.meta.env.DEV) {
+    if (VITE_MODE) {
       console.log(
         `🟥 ERROR: occurred while writing data to (info.json) -> ${
           (err as Error).message
@@ -301,13 +297,13 @@ export const readSessionFile = (
       fs.readFileSync(filePath, { encoding: "utf-8" })
     ) as yt.Progress.SessionInfoType;
 
-    if (import.meta.env.DEV) {
+    if (VITE_MODE) {
       console.log("🟩 Read session info succesfully");
     }
 
     return { success: true, sessionInfo };
   } catch (err) {
-    if (import.meta.env.DEV) {
+    if (VITE_MODE) {
       console.log(
         `🟥 Failed to read session info file -> ${(err as Error).message}`
       );
@@ -370,7 +366,7 @@ export const updateSessionProgress = (
 
     saveInfoToJson(sessionID, newSessionInfo.data);
 
-    if (import.meta.env.DEV) {
+    if (VITE_MODE) {
       // console.clear();
       console.log("---------------------------------------------");
       console.log("progress-state:", newSessionInfo.data.progressState);
@@ -395,7 +391,7 @@ export const downloadFile = (
     ytdl
       .downloadFromInfo(videoInfo, { format: format })
       .on("error", (err) => {
-        if (import.meta.env.DEV) {
+        if (VITE_MODE) {
           console.log(
             `🟥 Error: ytdl failed to download ${type} file -> ${err.message}`
           );
@@ -409,21 +405,21 @@ export const downloadFile = (
         if (!failed) {
           writeStream.end(); // stop the stream
           updateSessionProgress("download", sessionID);
-          if (import.meta.env.DEV) {
+          if (VITE_MODE) {
             console.log(`⬇️  ${type} downloaded successfully`);
           }
           resolve({ ok: true });
         }
       })
       .on("error", (err) => {
-        if (import.meta.env.DEV) {
+        if (VITE_MODE) {
           console.log(`🟥 ${type} write failed -> (${err.message})`);
         }
         writeStream.end(); // stop the stream
         resolve({ ok: false });
       })
       .on("close", () => {
-        if (import.meta.env.DEV) {
+        if (VITE_MODE) {
           console.log(`🟩 ${type} stream closed`);
           console.log("--------------------------");
         }

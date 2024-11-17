@@ -21,9 +21,8 @@ import {
   readSessionFile,
 } from "./ytHelpers";
 
-const tempFolderPath = import.meta.env.DEV
-  ? tempFolderName
-  : `/${tempFolderName}`;
+export const VITE_MODE = import.meta.env.PROD;
+export const tempFolderPath = VITE_MODE ? tempFolderName : `/${tempFolderName}`;
 
 // fix ffmpeg path error
 ffmpeg.setFfmpegPath(ffmpegPath);
@@ -40,7 +39,7 @@ export const ytSmartSearchHandler = async (
   try {
     // [1]: search as a video
     if (ytdl.validateURL(searchUrl)) {
-      if (import.meta.env.DEV) {
+      if (VITE_MODE) {
         console.log("✅ Valid youtube video url\n");
       }
 
@@ -65,7 +64,7 @@ export const ytSmartSearchHandler = async (
       });
       // [2]: search as playlist
     } else if (YouTube.validate(searchUrl, "PLAYLIST")) {
-      if (import.meta.env.DEV) {
+      if (VITE_MODE) {
         console.log("✅ Valid youtube playlist url\n");
       }
 
@@ -126,7 +125,7 @@ export const openDownloadSessionHandler = async (
       return;
     }
 
-    if (import.meta.env.DEV) {
+    if (VITE_MODE) {
       console.log("🟩 Download session opened");
     }
 
@@ -150,7 +149,7 @@ export const getSessionProgressHandler = async (
   // read the session file asynchronously
   fs.readFile(filePath, { encoding: "utf-8" }, (err, data) => {
     if (err) {
-      if (import.meta.env.DEV) {
+      if (VITE_MODE) {
         console.log(`🟥 Failed to read client info file -> ${err.message}`);
       }
       response.status(200).json({
@@ -159,7 +158,7 @@ export const getSessionProgressHandler = async (
         progress: 0,
       });
     } else {
-      if (import.meta.env.DEV) {
+      if (VITE_MODE) {
         console.log("🟩 Read client info succesfully");
       }
       const sessionInfo = JSON.parse(data) as yt.Progress.SessionInfoType;
@@ -181,13 +180,13 @@ export const downloadSessionCleaner = async (
   response.on("finish", () => {
     const tempFolder = path.resolve(tempFolderPath, sessionID);
 
-    if (import.meta.env.DEV) {
+    if (VITE_MODE) {
       console.log("\nCleaner 🧹🧹🧹🧹🧹");
     }
 
     // remove the whole tmp folder
     rm(tempFolder, { recursive: true, force: true }, (err) => {
-      if (import.meta.env.DEV) {
+      if (VITE_MODE) {
         if (err) {
           console.error(`🟥 Faild to delete the tmp folder -> ${err.message}`);
         } else {
@@ -228,21 +227,21 @@ export const videoUrlValidator = (
 
   try {
     if (!ytdl.validateURL(searchUrl)) {
-      if (import.meta.env.DEV) {
+      if (VITE_MODE) {
         console.log(`🟥 Invalid video url\n`);
       }
       response.sendStatus(201);
       return;
     }
   } catch (err) {
-    if (import.meta.env.DEV) {
+    if (VITE_MODE) {
       console.log(`🟥 ERROR: ${(err as Error).message}\n`);
     }
     response.sendStatus(201);
     return;
   }
 
-  if (import.meta.env.DEV) {
+  if (VITE_MODE) {
     console.log("🟩 Video url is valid\n");
   }
 
@@ -263,21 +262,21 @@ export const sessionFolderValidator = (
     const sessionFolderPath = path.resolve(tempFolderPath, sessionID);
 
     if (!fs.existsSync(sessionFolderPath)) {
-      if (import.meta.env.DEV) {
+      if (VITE_MODE) {
         console.log(`🟥 Session folder doesn't exist\n`);
       }
       response.sendStatus(202);
       return;
     }
   } catch (err) {
-    if (import.meta.env.DEV) {
+    if (VITE_MODE) {
       console.log(`🟥 ERROR: ${(err as Error).message}\n`);
     }
     response.sendStatus(202);
     return;
   }
 
-  if (import.meta.env.DEV) {
+  if (VITE_MODE) {
     console.log("🟩 Session folder exists\n");
   }
 
@@ -292,8 +291,6 @@ export const ytVideoDownloadHandler = async (
   const {
     body: { searchUrl, quality, sessionID },
   } = request;
-
-  console.log("-> sessionID:", sessionID);
 
   try {
     // get video info
@@ -317,7 +314,7 @@ export const ytVideoDownloadHandler = async (
     // get highest audio format (160k) default if exists
     const audioFormat = getAudioFormats(formats)[0];
 
-    if (import.meta.env.DEV) {
+    if (VITE_MODE) {
       console.log("----------------------------------");
       console.log("video quality:", targetFormat?.qualityLabel);
       console.log("audio quality:", audioFormat?.audioBitrate);
@@ -332,7 +329,7 @@ export const ytVideoDownloadHandler = async (
     const result = readSessionFile(sessionID);
 
     if (!result.success) {
-      if (import.meta.env.DEV) {
+      if (VITE_MODE) {
         console.log("🟥 Failed to read session info file");
       }
       response.sendStatus(203);
@@ -344,7 +341,7 @@ export const ytVideoDownloadHandler = async (
     sessionInfo.___total = 2;
 
     if (!saveInfoToJson(sessionID, sessionInfo.data)) {
-      if (import.meta.env.DEV) {
+      if (VITE_MODE) {
         console.log("🟥 Failed to save new session info to file");
       }
       response.sendStatus(204);
@@ -363,7 +360,7 @@ export const ytVideoDownloadHandler = async (
 
     // download
     // -----------------------------------------------------
-    if (import.meta.env.DEV) {
+    if (VITE_MODE) {
       console.log("\n============= Start ==============\n");
     }
 
@@ -373,7 +370,7 @@ export const ytVideoDownloadHandler = async (
     ])) as yt.PromiseAllSettledType[];
 
     if (!videoFileStatus!.value.ok || !audioFileStatus!.value.ok) {
-      if (import.meta.env.DEV) {
+      if (VITE_MODE) {
         console.log("🟥 Failed to download files");
       }
       response.sendStatus(205);
@@ -389,7 +386,7 @@ export const ytVideoDownloadHandler = async (
       .mergeAdd(audioFilePath)
       .saveToFile(outFilePath)
       .on("start", () => {
-        if (import.meta.env.DEV) {
+        if (VITE_MODE) {
           console.log("⚒️  Start converting...");
         }
       })
@@ -412,7 +409,7 @@ export const ytVideoDownloadHandler = async (
       .on("end", () => {
         // delete (video & audio) files thay are no longer needed
         unlink(videoFilePath, (err) => {
-          if (import.meta.env.DEV) {
+          if (VITE_MODE) {
             if (err) {
               console.log(`🟥 Faild to delete video file -> ${err.message}`);
             } else {
@@ -421,7 +418,7 @@ export const ytVideoDownloadHandler = async (
           }
         });
         unlink(audioFilePath, (err) => {
-          if (import.meta.env.DEV) {
+          if (VITE_MODE) {
             if (err) {
               console.log(`🟥 Faild to delete audio file -> ${err.message}`);
             } else {
@@ -433,7 +430,7 @@ export const ytVideoDownloadHandler = async (
         // send to client
         response.status(200).download(outFilePath, (err) => {
           if (err) {
-            if (import.meta.env.DEV) {
+            if (VITE_MODE) {
               console.error(
                 `🟥 Failed to send file to the client -> ${err.message}`
               );
@@ -441,19 +438,19 @@ export const ytVideoDownloadHandler = async (
             response.sendStatus(205);
             return;
           }
-          if (import.meta.env.DEV) {
+          if (VITE_MODE) {
             console.log("🟩 File sent to the client");
           }
         });
       })
       .on("error", (err) => {
-        if (import.meta.env.DEV) {
+        if (VITE_MODE) {
           console.error(`🟥 Failed to send file to the user -> ${err.message}`);
         }
         response.sendStatus(205);
       });
   } catch (err) {
-    if (import.meta.env.DEV) {
+    if (VITE_MODE) {
       console.log(`🟥 ERROR: ${(err as Error).message}`);
     }
     response.sendStatus(205);
@@ -491,7 +488,7 @@ export const ytAudioDownloadHandler = async (
     const result = readSessionFile(sessionID);
 
     if (!result.success) {
-      if (import.meta.env.DEV) {
+      if (VITE_MODE) {
         console.log("🟥 Failed to read session info file");
       }
       response.sendStatus(203);
@@ -503,7 +500,7 @@ export const ytAudioDownloadHandler = async (
     sessionInfo.___total = 1;
 
     if (!saveInfoToJson(sessionID, sessionInfo.data)) {
-      if (import.meta.env.DEV) {
+      if (VITE_MODE) {
         console.log("🟥 Failed to save new session info to file");
       }
       response.sendStatus(204);
@@ -518,7 +515,7 @@ export const ytAudioDownloadHandler = async (
 
     // download
     // -----------------------------------------------------
-    if (import.meta.env.DEV) {
+    if (VITE_MODE) {
       console.log("\n============= Start ==============\n");
     }
 
@@ -530,7 +527,7 @@ export const ytAudioDownloadHandler = async (
     )) as { ok: boolean };
 
     if (!audioFileStatus.ok) {
-      if (import.meta.env.DEV) {
+      if (VITE_MODE) {
         console.log("🟥 Failed to download audio file");
       }
       response.sendStatus(205);
@@ -545,7 +542,7 @@ export const ytAudioDownloadHandler = async (
       .audioBitrate(targetFormat.audioBitrate!)
       .saveToFile(outFilePath)
       .on("start", () => {
-        if (import.meta.env.DEV) {
+        if (VITE_MODE) {
           console.log("⚒️  Start converting...");
         }
       })
@@ -568,7 +565,7 @@ export const ytAudioDownloadHandler = async (
       .on("end", () => {
         // delete audio file thay are no longer needed
         unlink(audioFilePath, (err) => {
-          if (import.meta.env.DEV) {
+          if (VITE_MODE) {
             if (err) {
               console.log(`🟥 Faild to delete audio file -> ${err.message}`);
             } else {
@@ -580,7 +577,7 @@ export const ytAudioDownloadHandler = async (
         // send to client
         response.status(200).download(outFilePath, (err) => {
           if (err) {
-            if (import.meta.env.DEV) {
+            if (VITE_MODE) {
               console.error(
                 `🟥 Failed to send file to the client -> ${err.message}`
               );
@@ -588,19 +585,19 @@ export const ytAudioDownloadHandler = async (
             response.sendStatus(205);
             return;
           }
-          if (import.meta.env.DEV) {
+          if (VITE_MODE) {
             console.log("🟩 File sent to the client");
           }
         });
       })
       .on("error", (err) => {
-        if (import.meta.env.DEV) {
+        if (VITE_MODE) {
           console.error(`🟥 Failed to send file to the user -> ${err.message}`);
         }
         response.sendStatus(205);
       });
   } catch (err) {
-    if (import.meta.env.DEV) {
+    if (VITE_MODE) {
       console.log(`🟥 ERROR: ${(err as Error).message}`);
     }
     response.sendStatus(205);
