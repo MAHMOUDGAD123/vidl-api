@@ -11,9 +11,8 @@ const app: Express = express();
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: false, limit: "10mb" }));
 app.use(cookieParser());
-// app.use(session(SESSION_CONFIG));
 app.use(cors(CORS_OPTIONS));
-app.use("/api", routes);
+app.use("api", routes);
 
 app.get("/", async (_: Request, response: Response) => {
   response.status(200).json({
