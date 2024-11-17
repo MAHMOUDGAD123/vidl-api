@@ -391,10 +391,14 @@ export const downloadFile = (
     ytdl
       .downloadFromInfo(videoInfo, { format: format })
       .on("error", (err) => {
+        console.log(
+          `🟥 Error: ytdl failed to download ${type} file:`,
+          `\n- name:${err.name}`,
+          `\n- message: ${err.message}`,
+          `\n- stack: ${err.stack}`,
+          `\n- cause: ${err.cause}`
+        );
         if (VITE_MODE) {
-          console.log(
-            `🟥 Error: ytdl failed to download ${type} file -> ${err.message}`
-          );
         }
         failed = true;
         writeStream.end(); // stop the stream
