@@ -382,15 +382,16 @@ export const downloadFile = (
   path: string,
   videoInfo: ytdl.videoInfo,
   format: ytdl.videoFormat,
-  sessionID: string
+  sessionID: string,
+  url: string
 ): Promise<{ ok: boolean }> => {
   return new Promise((resolve) => {
     const writeStream = fs.createWriteStream(path);
     const type = format.hasVideo ? "Video" : "Audio";
     let failed = false;
 
-    ytdl
-      .downloadFromInfo(videoInfo, { format, agent })
+    ytdl(url, { format, agent, playerClients: ["IOS"] })
+      // .downloadFromInfo(videoInfo, { format, agent, playerClients: ["IOS"] })
       .on("error", (err) => {
         console.log(
           `🟥 Error: ytdl failed to download ${type} file:`,
