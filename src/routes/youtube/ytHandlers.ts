@@ -365,14 +365,8 @@ export const ytVideoDownloadHandler = async (
     }
 
     const [videoFileStatus, audioFileStatus] = (await Promise.allSettled([
-      downloadFile(
-        videoFilePath,
-        videoInfo,
-        targetFormat,
-        sessionID,
-        searchUrl
-      ),
-      downloadFile(audioFilePath, videoInfo, audioFormat, sessionID, searchUrl),
+      downloadFile(videoFilePath, videoInfo, targetFormat, sessionID),
+      downloadFile(audioFilePath, videoInfo, audioFormat, sessionID),
     ])) as yt.PromiseAllSettledType[];
 
     if (!videoFileStatus!.value.ok || !audioFileStatus!.value.ok) {
@@ -529,8 +523,7 @@ export const ytAudioDownloadHandler = async (
       audioFilePath,
       videoInfo,
       targetFormat,
-      sessionID,
-      searchUrl
+      sessionID
     )) as { ok: boolean };
 
     if (!audioFileStatus.ok) {

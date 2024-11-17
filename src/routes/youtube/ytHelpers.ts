@@ -381,17 +381,15 @@ export const downloadFile = (
   path: string,
   videoInfo: ytdl.videoInfo,
   format: ytdl.videoFormat,
-  sessionID: string,
-  url: string
+  sessionID: string
 ): Promise<{ ok: boolean }> => {
   return new Promise((resolve) => {
     const writeStream = fs.createWriteStream(path);
     const type = format.hasVideo ? "Video" : "Audio";
     let failed = false;
 
-    // ytdl
-    //   .downloadFromInfo(videoInfo, { format: format })
-    ytdl(url, { format })
+    ytdl
+      .downloadFromInfo(videoInfo, { format: format })
       .on("error", (err) => {
         if (VITE_MODE) {
           console.log(
