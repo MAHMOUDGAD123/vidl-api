@@ -186,12 +186,12 @@ export const downloadSessionCleaner = async (
 
     // remove the whole tmp folder
     rm(tempFolder, { recursive: true, force: true }, (err) => {
+      if (err) {
+        console.error(`🟥 Faild to delete the tmp folder -> ${err.message}`);
+      } else {
+        console.log("🟩 Temp folder deleted successfully");
+      }
       if (VITE_MODE) {
-        if (err) {
-          console.error(`🟥 Faild to delete the tmp folder -> ${err.message}`);
-        } else {
-          console.log("🟩 Temp folder deleted successfully");
-        }
         console.log("\n============== End ===============");
       }
     });
