@@ -204,7 +204,7 @@ export const downloadSessionCleaner = async (
 //======================= downloading =======================
 
 /**
- * not used yet ❌
+ * not used yet in client ❌
  * --------------------------------------
  * response status code:
  * 201 => invalid video url
@@ -518,8 +518,8 @@ export const ytAudioDownloadHandler = async (
 
     // download
     // -----------------------------------------------------
-    console.log("\n============= Start ==============\n");
     if (import.meta.env.DEV) {
+      console.log("\n============= Start ==============\n");
     }
 
     const audioFileStatus = (await downloadFile(

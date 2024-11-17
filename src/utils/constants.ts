@@ -422,7 +422,7 @@ const cookies = [
 export const agent = ytdl.createAgent(cookies);
 
 export const CORS_OPTIONS: CorsOptions = {
-  origin: true,
+  origin: [/https:\/\/vidl-client.vercel.app/, /http:\/\/localhost:\d{4}/],
   credentials: true,
   methods: ["GET", "POST"],
   optionsSuccessStatus: 200,
