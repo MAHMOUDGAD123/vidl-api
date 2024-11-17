@@ -21,7 +21,7 @@ import {
   readSessionFile,
 } from "./ytHelpers";
 
-export const VITE_MODE = import.meta.env.PROD;
+export const VITE_MODE = import.meta.env.DEV;
 export const tempFolderPath = VITE_MODE ? tempFolderName : `/${tempFolderName}`;
 
 // fix ffmpeg path error
@@ -125,8 +125,8 @@ export const openDownloadSessionHandler = async (
       return;
     }
 
+    console.log("🟩 Download session opened");
     if (VITE_MODE) {
-      console.log("🟩 Download session opened");
     }
 
     response

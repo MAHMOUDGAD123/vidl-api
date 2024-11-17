@@ -239,19 +239,19 @@ export const createSessionFolder = (
 
   try {
     if (fs.existsSync(sessionFolderPath)) {
-      throw new Error(`- [${sessionFolderPath}] folder already exists`);
+      throw new Error(`[${sessionFolderPath}] folder already exists`);
     } else {
       fs.mkdirSync(sessionFolderPath, { recursive: true });
 
+      console.log(
+        `🟩 Session folder created successfully [${sessionFolderPath}]`
+      );
       if (VITE_MODE) {
-        console.log(
-          `🟩 Session folder created successfully [${sessionFolderPath}]`
-        );
       }
     }
   } catch (err) {
     if (VITE_MODE) {
-      console.log(`🟥 ERROR: ${(err as Error).message}`);
+      console.log(`🟥 ${(err as Error).message}`);
       console.log("🟥 Failed to create session folder");
     }
     return { sessionFolderPath, error: true };
