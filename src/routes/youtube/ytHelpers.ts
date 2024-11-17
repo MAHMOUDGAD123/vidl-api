@@ -391,10 +391,10 @@ export const downloadFile = (
     ytdl
       .downloadFromInfo(videoInfo, { format: format })
       .on("error", (err) => {
-        console.log(
-          `🟥 Error: ytdl failed to download ${type} file -> ${err.message}`
-        );
         if (VITE_MODE) {
+          console.log(
+            `🟥 Error: ytdl failed to download ${type} file -> ${err.message}`
+          );
         }
         failed = true;
         writeStream.end(); // stop the stream
@@ -405,15 +405,15 @@ export const downloadFile = (
         if (!failed) {
           writeStream.end(); // stop the stream
           updateSessionProgress("download", sessionID);
-          console.log(`⬇️  ${type} downloaded successfully`);
           if (VITE_MODE) {
+            console.log(`⬇️  ${type} downloaded successfully`);
           }
           resolve({ ok: true });
         }
       })
       .on("error", (err) => {
-        console.log(`🟥 ${type} write failed -> (${err.message})`);
         if (VITE_MODE) {
+          console.log(`🟥 ${type} write failed -> (${err.message})`);
         }
         writeStream.end(); // stop the stream
         resolve({ ok: false });

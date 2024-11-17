@@ -597,9 +597,9 @@ export const ytAudioDownloadHandler = async (
         response.sendStatus(205);
       });
   } catch (err) {
-    console.log(`🟥 BAD ERROR`);
-    console.log(`🟥 ERROR: ${(err as Error).message}`);
     if (VITE_MODE) {
+      console.log(`🟥 BAD ERROR`);
+      console.log(`🟥 ERROR: ${(err as Error).message}`);
     }
     response.sendStatus(205);
   }
