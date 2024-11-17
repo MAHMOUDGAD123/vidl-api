@@ -4,6 +4,7 @@ import path from "path";
 import type { yt } from "../../types/youtube-types";
 import { SessionInfo } from "../../utils/classes";
 import { tempFolderPath, VITE_MODE } from "./ytHandlers";
+import { agent } from "../../utils/constants";
 
 /**
  * filter the (info.formats) and get all qualities:
@@ -389,7 +390,7 @@ export const downloadFile = (
     let failed = false;
 
     ytdl
-      .downloadFromInfo(videoInfo, { format: format })
+      .downloadFromInfo(videoInfo, { format, agent })
       .on("error", (err) => {
         console.log(
           `🟥 Error: ytdl failed to download ${type} file:`,
