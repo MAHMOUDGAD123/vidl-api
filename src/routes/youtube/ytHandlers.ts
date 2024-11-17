@@ -125,8 +125,8 @@ export const openDownloadSessionHandler = async (
       return;
     }
 
-    console.log("🟩 Download session opened");
     if (VITE_MODE) {
+      console.log("🟩 Download session opened");
     }
 
     response
@@ -597,8 +597,9 @@ export const ytAudioDownloadHandler = async (
         response.sendStatus(205);
       });
   } catch (err) {
+    console.log(`🟥 BAD ERROR`);
+    console.log(`🟥 ERROR: ${(err as Error).message}`);
     if (VITE_MODE) {
-      console.log(`🟥 ERROR: ${(err as Error).message}`);
     }
     response.sendStatus(205);
   }
