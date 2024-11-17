@@ -158,8 +158,8 @@ export const getSessionProgressHandler = async (
         progress: 0,
       });
     } else {
-      console.log("🟩 Read client info succesfully");
       if (VITE_MODE) {
+        console.log("🟩 Read client info succesfully");
       }
       const sessionInfo = JSON.parse(data) as yt.Progress.SessionInfoType;
       response.status(200).json(sessionInfo.clientInfo);
