@@ -347,7 +347,7 @@ export const updateSessionProgress = (
         };
         newSessionInfo._clientInfo = {
           state: "progress",
-          msg: `converting files (${getFileSize(size)})`,
+          msg: `converting...(${getFileSize(size)})`,
           progress: getConvertingStateProgress(
             timeMark,
             newSessionInfo.__duration
@@ -381,15 +381,17 @@ export const downloadFile = (
   path: string,
   videoInfo: ytdl.videoInfo,
   format: ytdl.videoFormat,
-  sessionID: string
+  sessionID: string,
+  url: string
 ): Promise<{ ok: boolean }> => {
   return new Promise((resolve) => {
     const writeStream = fs.createWriteStream(path);
     const type = format.hasVideo ? "Video" : "Audio";
     let failed = false;
 
-    ytdl
-      .downloadFromInfo(videoInfo, { format: format })
+    // ytdl
+    //   .downloadFromInfo(videoInfo, { format: format })
+    ytdl(url, { format })
       .on("error", (err) => {
         if (VITE_MODE) {
           console.log(
@@ -413,7 +415,7 @@ export const downloadFile = (
       })
       .on("error", (err) => {
         if (VITE_MODE) {
-          console.log(`🟥 ${type} write failed -> (${err.message})`);
+          console.log(`🟥 ${type} stream write failed -> (${err.message})`);
         }
         writeStream.end(); // stop the stream
         resolve({ ok: false });
