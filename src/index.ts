@@ -2,9 +2,8 @@ import express, { type Express, type Response, type Request } from "express";
 import cors from "cors";
 import routes from "./routes/router";
 import cookieParser from "cookie-parser";
-import session from "express-session";
-// import session from "cookie-session";
-import { CORS_OPTIONS, SESSION_CONFIG } from "./utils/constants";
+// import session from "express-session";
+import { CORS_OPTIONS /*, SESSION_CONFIG */ } from "./utils/constants";
 
 const app: Express = express();
 
@@ -12,7 +11,7 @@ const app: Express = express();
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: false, limit: "10mb" }));
 app.use(cookieParser());
-app.use(session(SESSION_CONFIG));
+// app.use(session(SESSION_CONFIG));
 app.use(cors(CORS_OPTIONS));
 app.use("/api", routes);
 
@@ -39,4 +38,4 @@ if (import.meta.env.PROD) {
 }
 
 export const viteNodeApp = app; // for vite-node plugin
-export default app;
+export default app; // for vercel deployment

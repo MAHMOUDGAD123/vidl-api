@@ -341,7 +341,7 @@ const logInfo = (...optionalParams: any[]) => {
   console.clear();
   console.info(
     time,
-    "\x1b[36m[vite-update]\x1b[0m",
+    "\x1b[36m\x1b[1m[vite-update]\x1b[0m\x1b[0m",
     "[",
     `\x1b[90m${newModuleName}\x1b[0m`,
     "]",
@@ -367,7 +367,7 @@ const logErr = (...optionalParams: any[]) => {
   console.clear();
   console.error(
     time,
-    "\x1b[31m[vite-error]\x1b[0m",
+    "\x1b[31m\x1b[1m[vite-error]\x1b[0m\x1b[0m",
     "[\x1b[90m",
     optionalParams.join(" - "),
     "\x1b[0m]"

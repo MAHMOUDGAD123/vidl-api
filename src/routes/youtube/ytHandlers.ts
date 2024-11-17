@@ -6,17 +6,20 @@ import ffmpeg from "fluent-ffmpeg";
 import { path as ffmpegPath } from "@ffmpeg-installer/ffmpeg";
 import type { NextFunction, Request, Response } from "express";
 import type { yt } from "../../types/youtube-types";
+import { agent, tempFolderName } from "../../utils/constants";
+import { v7 as uuidv7 } from "uuid";
+import { SessionInfo } from "../../utils/classes";
 import {
   getVideoFormats,
   getAudioFormats,
   downloadFile,
-  createTempFolder,
+  createSessionFolder,
   updateSessionProgress,
   saveInfoToJson,
   getAudioFormat_safe,
   getVideoFormat_safe,
+  readSessionFile,
 } from "./ytHelpers";
-import { agent, tempFolderName } from "../../utils/constants";
 
 const tempFolderPath = import.meta.env.DEV
   ? tempFolderName
@@ -38,7 +41,7 @@ export const ytSmartSearchHandler = async (
     // [1]: search as a video
     if (ytdl.validateURL(searchUrl)) {
       if (import.meta.env.DEV) {
-        console.log("Valid youtube video url ✅\n");
+        console.log("✅ Valid youtube video url\n");
       }
 
       // video info
@@ -63,7 +66,7 @@ export const ytSmartSearchHandler = async (
       // [2]: search as playlist
     } else if (YouTube.validate(searchUrl, "PLAYLIST")) {
       if (import.meta.env.DEV) {
-        console.log("Valid youtube playlist url ✅\n");
+        console.log("✅ Valid youtube playlist url\n");
       }
 
       const listInfo = await YouTube.getPlaylist(searchUrl, {
@@ -101,163 +104,94 @@ export const ytSmartSearchHandler = async (
   }
 };
 
-/** open download session & create the session folder */
+/** open download session & create the session folder using (uuid) */
 export const openDownloadSessionHandler = async (
-  request: Request,
-  response: Response<yt.Progress.ClientInfoType>
+  _: Request,
+  response: Response<yt.Progress.OpenDownloadSessionResponse>
 ) => {
-  const sessionReq = request as typeof request & yt.Progress.RequestSessionType;
-
-  if (sessionReq.session.vidl) {
-    if (import.meta.env.DEV) {
-      console.log("Session already opened 🟩");
-    }
-  } else {
-    if (import.meta.env.DEV) {
-      console.log("not connected 🥺");
-    }
-    // init the session data
-    sessionReq.session.vidl = {
-      connected: true,
-      clientInfo: { state: "fetch", msg: "fetching info", progress: 0 },
-      progressState: {
-        duration: "",
-        downloadProgressState: {
-          total: 0, // total files to download
-          finish: 0, // downloaded files
-        },
-        mergeProgressState: {
-          size: 0,
-          timeMark: "",
-        },
-      },
-    };
-    if (import.meta.env.DEV) {
-      console.log("Download Session opened 🟩");
-    }
-  }
+  // init the session data
+  const sessionID = uuidv7();
+  const sessionInfo = new SessionInfo(sessionID);
 
   // create the session temporary folder in (/tmp)
-  const { error } = createTempFolder(tempFolderPath, request.sessionID);
+  const { error } = createSessionFolder(sessionID);
 
   if (error) {
     // failed to open the session & create the session folder
-    response.sendStatus(204);
+    response.sendStatus(206);
   } else {
-    const clientInfo = sessionReq.session.vidl.clientInfo;
-    saveInfoToJson(sessionReq.sessionID, clientInfo);
-    response.status(200).json(clientInfo);
-  }
-};
-
-/** check connection & logs the session id before download start */
-export const downloadSessionInfoLogger = async (
-  request: Request,
-  _: Response,
-  next: NextFunction
-) => {
-  const sessionReq = request as typeof request & yt.Progress.RequestSessionType;
-
-  if (import.meta.env.DEV) {
-    console.clear();
-    console.log("\n======= Session Info Start =======\n");
-
-    if (sessionReq.session.vidl) {
-      console.log("connected 😊");
-    } else {
-      console.log("not connected 🥺");
+    if (!saveInfoToJson(sessionID, sessionInfo.data)) {
+      // if failed to save session info to file
+      response.sendStatus(206);
+      return;
     }
-    console.log("SessionID:", sessionReq.sessionID);
-    console.log("\n======== Session Info End ========");
-  }
 
-  next();
+    if (import.meta.env.DEV) {
+      console.log("🟩 Download session opened");
+    }
+
+    response
+      .status(200)
+      .json({ sessionID, progressInfo: sessionInfo._clientInfo });
+  }
 };
 
 /** feed the client with progress information */
 export const getSessionProgressHandler = async (
-  request: Request,
+  request: yt.Download.VideoDownloadRequestType,
   response: Response<yt.Progress.ClientInfoType>
 ) => {
-  const sessionReq = request as typeof request & yt.Progress.RequestSessionType;
+  const {
+    body: { sessionID },
+  } = request;
 
-  if (sessionReq.session.vidl) {
-    const filePath = path.resolve(
-      tempFolderPath,
-      sessionReq.sessionID,
-      "info.json"
-    );
+  const filePath = path.resolve(tempFolderPath, sessionID, "info.json");
 
-    try {
-      fs.readFile(filePath, { encoding: "utf-8" }, (err, data) => {
-        if (err) {
-          if (import.meta.env.DEV) {
-            console.log(`Failed to Read client info file ❓ -> ${err.message}`);
-          }
-          response.status(200).json({
-            state: "fetch",
-            msg: "fetching info",
-            progress: 0,
-          });
-        } else {
-          if (import.meta.env.DEV) {
-            console.log("Read client info succesfully ✅");
-          }
-          response
-            .status(200)
-            .json(JSON.parse(data) as yt.Progress.ClientInfoType);
-        }
-      });
-      return;
-    } catch (err) {
+  // read the session file asynchronously
+  fs.readFile(filePath, { encoding: "utf-8" }, (err, data) => {
+    if (err) {
       if (import.meta.env.DEV) {
-        console.log(
-          `ERROR: occurred while reading info file -> ${(err as Error).message}`
-        );
+        console.log(`🟥 Failed to read client info file -> ${err.message}`);
       }
+      response.status(200).json({
+        state: "error",
+        msg: "session closed 💀",
+        progress: 0,
+      });
+    } else {
+      if (import.meta.env.DEV) {
+        console.log("🟩 Read client info succesfully");
+      }
+      const sessionInfo = JSON.parse(data) as yt.Progress.SessionInfoType;
+      response.status(200).json(sessionInfo.clientInfo);
     }
-  }
-
-  response.status(200).json({
-    state: "error",
-    msg: "session closed 💀",
-    progress: 0,
   });
 };
 
 /** emitted when the response has been sent to the user */
 export const downloadSessionCleaner = async (
-  request: Request,
+  request: yt.Download.VideoDownloadRequestType,
   response: Response,
   next: NextFunction
 ) => {
+  const {
+    body: { sessionID },
+  } = request;
+
   response.on("finish", () => {
-    const sessionReq = request as typeof request &
-      yt.Progress.RequestSessionType;
-    const tempFolder = path.resolve(tempFolderPath, sessionReq.sessionID);
+    const tempFolder = path.resolve(tempFolderPath, sessionID);
 
     if (import.meta.env.DEV) {
       console.log("\nCleaner 🧹🧹🧹🧹🧹");
     }
 
-    // kill the session
-    request.session.destroy((err) => {
-      if (import.meta.env.DEV) {
-        if (err) {
-          console.error(`Failed to kill session -> ${err.message}`);
-        } else {
-          console.log("SessionID:", sessionReq.sessionID);
-          console.log("Session Killed 💀");
-        }
-      }
-    });
     // remove the whole tmp folder
     rm(tempFolder, { recursive: true, force: true }, (err) => {
       if (import.meta.env.DEV) {
         if (err) {
-          console.error(`Faild to delete the tmp folder ❓ -> ${err.message}`);
+          console.error(`🟥 Faild to delete the tmp folder -> ${err.message}`);
         } else {
-          console.log("Temp folder deleted successfully ✅");
+          console.log("🟩 Temp folder deleted successfully");
         }
         console.log("\n============== End ===============");
       }
@@ -269,29 +203,100 @@ export const downloadSessionCleaner = async (
 
 //======================= downloading =======================
 
-/** youtube video with (url & quality) downloader */
+/**
+ * not used yet ❌
+ * --------------------------------------
+ * response status code:
+ * 201 => invalid video url
+ * 202 => session folder doesn't exist
+ * 203 => failed to read session info file
+ * 204 => failed to save session info to file
+ * 205 => failed to download files
+ * 206 => failed to open a download session
+ * --------------------------------------
+ */
+
+/** validate the video url before download */
+export const videoUrlValidator = (
+  request: yt.Download.VideoDownloadRequestType,
+  response: Response,
+  next: NextFunction
+) => {
+  const {
+    body: { searchUrl },
+  } = request;
+
+  try {
+    if (!ytdl.validateURL(searchUrl)) {
+      if (import.meta.env.DEV) {
+        console.log(`🟥 Invalid video url\n`);
+      }
+      response.sendStatus(201);
+      return;
+    }
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.log(`🟥 ERROR: ${(err as Error).message}\n`);
+    }
+    response.sendStatus(201);
+    return;
+  }
+
+  if (import.meta.env.DEV) {
+    console.log("🟩 Video url is valid\n");
+  }
+
+  next();
+};
+
+/** confirm that session folder is exists before download */
+export const sessionFolderValidator = (
+  request: yt.Download.VideoDownloadRequestType,
+  response: Response,
+  next: NextFunction
+) => {
+  const {
+    body: { sessionID },
+  } = request;
+
+  try {
+    const sessionFolderPath = path.resolve(tempFolderPath, sessionID);
+
+    if (!fs.existsSync(sessionFolderPath)) {
+      if (import.meta.env.DEV) {
+        console.log(`🟥 Session folder doesn't exist\n`);
+      }
+      response.sendStatus(202);
+      return;
+    }
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.log(`🟥 ERROR: ${(err as Error).message}\n`);
+    }
+    response.sendStatus(202);
+    return;
+  }
+
+  if (import.meta.env.DEV) {
+    console.log("🟩 Session folder exists\n");
+  }
+
+  next();
+};
+
+/** youtube video downloader */
 export const ytVideoDownloadHandler = async (
   request: yt.Download.VideoDownloadRequestType,
   response: Response
 ) => {
   const {
-    body: { searchUrl, quality },
+    body: { searchUrl, quality, sessionID },
   } = request;
 
+  console.log("-> sessionID:", sessionID);
+
   try {
-    if (!ytdl.validateURL(searchUrl)) {
-      response.status(200).json({
-        errMsg: "Invalid youtube video url. Please try again",
-        type: "none",
-      });
-      return;
-    }
-
-    if (import.meta.env.DEV) {
-      console.log("video url is valid ✅\n");
-    }
-
-    // video info
+    // get video info
     const videoInfo = await ytdl.getInfo(searchUrl, {
       playerClients: ["IOS"],
       agent,
@@ -305,13 +310,12 @@ export const ytVideoDownloadHandler = async (
     );
 
     if (targetFormat === null) {
-      if (import.meta.env.DEV) {
-        console.log("video not exist ❌");
-      }
-      throw ""; // this is kind of impossible 😱❓
+      // this is kind of impossible 😱❓(just to be more safe)
+      throw new Error("Video format doesn't exist");
     }
 
-    const audioFormat = getAudioFormats(formats)[0]; // get highest audio format
+    // get highest audio format (160k) default if exists
+    const audioFormat = getAudioFormats(formats)[0];
 
     if (import.meta.env.DEV) {
       console.log("----------------------------------");
@@ -321,19 +325,33 @@ export const ytVideoDownloadHandler = async (
     }
 
     if (audioFormat === undefined) {
-      if (import.meta.env.DEV) {
-        console.log("audio not exist ❌");
-      }
-      throw ""; // this is kind of impossible too 😱❓
+      // this is kind of impossible too 😱❓(just to be more safe)
+      throw new Error("Audio format doesn't exist");
     }
 
-    const sessionReq = request as typeof request &
-      yt.Progress.RequestSessionType;
+    const result = readSessionFile(sessionID);
 
+    if (!result.success) {
+      if (import.meta.env.DEV) {
+        console.log("🟥 Failed to read session info file");
+      }
+      response.sendStatus(203);
+      return;
+    }
+
+    const sessionInfo = new SessionInfo(result.sessionInfo!);
     // set file count to (2 files)
-    sessionReq.session.vidl.progressState.downloadProgressState.total = 2;
+    sessionInfo.___total = 2;
 
-    const tempFolder = path.resolve(tempFolderPath, request.sessionID);
+    if (!saveInfoToJson(sessionID, sessionInfo.data)) {
+      if (import.meta.env.DEV) {
+        console.log("🟥 Failed to save new session info to file");
+      }
+      response.sendStatus(204);
+      return;
+    }
+
+    const tempFolder = path.resolve(tempFolderPath, sessionID);
     const videoFilePath = path.resolve(
       tempFolder,
       `video.${targetFormat.container}`
@@ -350,11 +368,14 @@ export const ytVideoDownloadHandler = async (
     }
 
     const [videoFileStatus, audioFileStatus] = (await Promise.allSettled([
-      downloadFile(videoFilePath, videoInfo, targetFormat, sessionReq),
-      downloadFile(audioFilePath, videoInfo, audioFormat, sessionReq),
+      downloadFile(videoFilePath, videoInfo, targetFormat, sessionID),
+      downloadFile(audioFilePath, videoInfo, audioFormat, sessionID),
     ])) as yt.PromiseAllSettledType[];
 
     if (!videoFileStatus!.value.ok || !audioFileStatus!.value.ok) {
+      if (import.meta.env.DEV) {
+        console.log("🟥 Failed to download files");
+      }
       response.sendStatus(205);
       return;
     }
@@ -369,7 +390,7 @@ export const ytVideoDownloadHandler = async (
       .saveToFile(outFilePath)
       .on("start", () => {
         if (import.meta.env.DEV) {
-          console.log("Start merging... ⚒️");
+          console.log("⚒️  Start converting...");
         }
       })
       .on("codecData", (codecData) => {
@@ -378,33 +399,33 @@ export const ytVideoDownloadHandler = async (
           duration: (codecData as typeof codecData & { duration: string })
             .duration,
         };
-        updateSessionProgress("duration", sessionReq, progressInfo);
+        updateSessionProgress("duration", sessionID, progressInfo);
       })
       .on("progress", ({ targetSize, timemark }) => {
-        // update the mergeProgressState only
-        const progressInfo: yt.Progress.MergeProgressStateType = {
+        // update the convertProgressState only
+        const progressInfo: yt.Progress.ConvertProgressStateType = {
           size: targetSize,
           timeMark: timemark,
         };
-        updateSessionProgress("convert", sessionReq, progressInfo);
+        updateSessionProgress("convert", sessionID, progressInfo);
       })
       .on("end", () => {
         // delete (video & audio) files thay are no longer needed
         unlink(videoFilePath, (err) => {
           if (import.meta.env.DEV) {
             if (err) {
-              console.log(`Faild to delete video file ❌ -> ${err.message}`);
+              console.log(`🟥 Faild to delete video file -> ${err.message}`);
             } else {
-              console.log("Video File deleted successfully ✅");
+              console.log("🟩 Video File deleted successfully");
             }
           }
         });
         unlink(audioFilePath, (err) => {
           if (import.meta.env.DEV) {
             if (err) {
-              console.log(`Faild to delete audio file ❌ -> ${err.message}`);
+              console.log(`🟥 Faild to delete audio file -> ${err.message}`);
             } else {
-              console.log("Audio File deleted successfully ✅");
+              console.log("🟩 Audio File deleted successfully");
             }
           }
         });
@@ -414,51 +435,42 @@ export const ytVideoDownloadHandler = async (
           if (err) {
             if (import.meta.env.DEV) {
               console.error(
-                `Failed to send file to the client ❌ -> ${err.message}`
+                `🟥 Failed to send file to the client -> ${err.message}`
               );
             }
-            response.sendStatus(204);
-          } else {
-            if (import.meta.env.DEV) {
-              console.log("File sent to the client ✅");
-            }
+            response.sendStatus(205);
+            return;
+          }
+          if (import.meta.env.DEV) {
+            console.log("🟩 File sent to the client");
           }
         });
       })
       .on("error", (err) => {
         if (import.meta.env.DEV) {
-          console.error(`Faied to send file to the user ❌ -> ${err.message}`);
+          console.error(`🟥 Failed to send file to the user -> ${err.message}`);
         }
-        response.sendStatus(204);
+        response.sendStatus(205);
       });
   } catch (err) {
-    response.sendStatus(204);
+    if (import.meta.env.DEV) {
+      console.log(`🟥 ERROR: ${(err as Error).message}`);
+    }
+    response.sendStatus(205);
   }
 };
 
-/** youtube audio with (url & quality) only downloader */
+/** youtube audio downloader */
 export const ytAudioDownloadHandler = async (
   request: yt.Download.VideoDownloadRequestType,
   response: Response
 ) => {
   const {
-    body: { searchUrl, quality },
+    body: { searchUrl, quality, sessionID },
   } = request;
 
   try {
-    if (!ytdl.validateURL(searchUrl)) {
-      response.status(200).json({
-        errMsg: "Invalid youtube video url. Please try again",
-        type: "none",
-      });
-      return;
-    }
-
-    console.log("video url is valid ✅\n");
-    if (import.meta.env.DEV) {
-    }
-
-    // video info
+    // get video info
     const videoInfo = await ytdl.getInfo(searchUrl, {
       playerClients: ["IOS"],
       agent,
@@ -470,23 +482,35 @@ export const ytAudioDownloadHandler = async (
       getAudioFormats(formats),
       quality as yt.AudioQualities
     );
-    console.log("filter ok ✅");
 
     if (targetFormat === null) {
-      console.log("video not exist ❌");
-      if (import.meta.env.DEV) {
-      }
-      response.sendStatus(204);
-      return; // this is kind of impossible 😱❓
+      // this is kind of impossible 😱❓(just to be more safe)
+      throw new Error("Audio format doesn't exist");
     }
 
-    const sessionReq = request as typeof request &
-      yt.Progress.RequestSessionType;
+    const result = readSessionFile(sessionID);
 
+    if (!result.success) {
+      if (import.meta.env.DEV) {
+        console.log("🟥 Failed to read session info file");
+      }
+      response.sendStatus(203);
+      return;
+    }
+
+    const sessionInfo = new SessionInfo(result.sessionInfo!);
     // set file count to (1 files)
-    sessionReq.session.vidl.progressState.downloadProgressState.total = 1;
+    sessionInfo.___total = 1;
 
-    const tempFolder = path.resolve(tempFolderPath, request.sessionID);
+    if (!saveInfoToJson(sessionID, sessionInfo.data)) {
+      if (import.meta.env.DEV) {
+        console.log("🟥 Failed to save new session info to file");
+      }
+      response.sendStatus(204);
+      return;
+    }
+
+    const tempFolder = path.resolve(tempFolderPath, sessionID);
     const audioFilePath = path.resolve(
       tempFolder,
       `audio.${targetFormat.container}`
@@ -502,11 +526,14 @@ export const ytAudioDownloadHandler = async (
       audioFilePath,
       videoInfo,
       targetFormat,
-      sessionReq
+      sessionID
     )) as { ok: boolean };
 
     if (!audioFileStatus.ok) {
-      response.sendStatus(204);
+      if (import.meta.env.DEV) {
+        console.log("🟥 Failed to download audio file");
+      }
+      response.sendStatus(205);
       return;
     }
 
@@ -518,8 +545,8 @@ export const ytAudioDownloadHandler = async (
       .audioBitrate(targetFormat.audioBitrate!)
       .saveToFile(outFilePath)
       .on("start", () => {
-        console.log("start converting... ⚒️");
         if (import.meta.env.DEV) {
+          console.log("⚒️  Start converting...");
         }
       })
       .on("codecData", (codecData) => {
@@ -528,24 +555,24 @@ export const ytAudioDownloadHandler = async (
           duration: (codecData as typeof codecData & { duration: string })
             .duration,
         };
-        updateSessionProgress("duration", sessionReq, progressInfo);
+        updateSessionProgress("duration", sessionID, progressInfo);
       })
       .on("progress", ({ targetSize, timemark }) => {
         // update the mergeProgressState only
-        const progressInfo: yt.Progress.MergeProgressStateType = {
+        const progressInfo: yt.Progress.ConvertProgressStateType = {
           size: targetSize,
           timeMark: timemark,
         };
-        updateSessionProgress("convert", sessionReq, progressInfo);
+        updateSessionProgress("convert", sessionID, progressInfo);
       })
       .on("end", () => {
         // delete audio file thay are no longer needed
         unlink(audioFilePath, (err) => {
           if (import.meta.env.DEV) {
             if (err) {
-              console.error(`Faild to delete audio file ❌ -> ${err.message}`);
+              console.log(`🟥 Faild to delete audio file -> ${err.message}`);
             } else {
-              console.log("Audio File deleted successfully ✅");
+              console.log("🟩 Audio File deleted successfully");
             }
           }
         });
@@ -555,29 +582,32 @@ export const ytAudioDownloadHandler = async (
           if (err) {
             if (import.meta.env.DEV) {
               console.error(
-                `Failed to send file to the client ❌ -> ${err.message}`
+                `🟥 Failed to send file to the client -> ${err.message}`
               );
             }
-            response.sendStatus(204);
+            response.sendStatus(205);
             return;
           }
           if (import.meta.env.DEV) {
-            console.log("File sent to the client ✅");
+            console.log("🟩 File sent to the client");
           }
         });
       })
       .on("error", (err) => {
-        console.error(`Faied to send file to the user ❌ -> ${err.message}`);
         if (import.meta.env.DEV) {
+          console.error(`🟥 Failed to send file to the user -> ${err.message}`);
         }
-        response.sendStatus(204);
+        response.sendStatus(205);
       });
   } catch (err) {
-    console.log((err as Error).message, "❓");
-    response.sendStatus(204);
+    if (import.meta.env.DEV) {
+      console.log(`🟥 ERROR: ${(err as Error).message}`);
+    }
+    response.sendStatus(205);
   }
 };
 
+// not used ❌
 // maybe used to download a compressed playlist in the future
 /** youtube list downloader */
 export const ytListDownloadHandler = async (

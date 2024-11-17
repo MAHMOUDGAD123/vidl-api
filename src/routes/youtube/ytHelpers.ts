@@ -1,8 +1,9 @@
 import ytdl from "@distube/ytdl-core";
-import type { yt } from "../../types/youtube-types";
-import fs, { existsSync } from "fs";
+import fs from "fs";
 import path from "path";
 import { tempFolderName } from "../../utils/constants";
+import type { yt } from "../../types/youtube-types";
+import { SessionInfo } from "../../utils/classes";
 
 const tempFolderPath = import.meta.env.DEV
   ? tempFolderName
@@ -204,7 +205,7 @@ export const videoDurationInSeconds = (duration: string): number => {
   return +hr * 60 * 60 + +min * 60 + +sec;
 };
 
-export const getMergingStateProgress = (
+export const getConvertingStateProgress = (
   timeMark: string,
   totalDuration: string
 ) => {
@@ -228,34 +229,45 @@ export const getFileSize = (sizeInKB: number) => {
     : sizeInKB + " kb";
 };
 
-/** create a new folder with name as _sessionID_ at ( targetPath ) */
-export const createTempFolder = (
-  targetPath: string,
+export const isVideoFormat = (quality: number) => {
+  return new Set([4320, 2160, 1440, 1080, 720, 480, 360, 240, 144]).has(
+    quality
+  );
+};
+
+/** create a new folder with name as _sessionID_ at ( tempFolderPath ) */
+export const createSessionFolder = (
   sessionID: string
-): { newPath: string; error: boolean } => {
-  const newPath = path.resolve(targetPath, sessionID);
+): { sessionFolderPath: string; error: boolean } => {
+  const sessionFolderPath = path.resolve(tempFolderPath, sessionID);
 
   try {
-    if (existsSync(newPath)) {
-      if (import.meta.env.DEV) {
-        console.log(`[${newPath}] folder already exists ❓`);
-      }
+    if (fs.existsSync(sessionFolderPath)) {
+      throw new Error(`- [${sessionFolderPath}] folder already exists`);
     } else {
-      fs.mkdirSync(newPath, { recursive: true });
+      fs.mkdirSync(sessionFolderPath, { recursive: true });
+
       if (import.meta.env.DEV) {
-        console.log(`Session folder created successfully ✅ [${newPath}]`);
+        console.log(
+          `🟩 Session folder created successfully [${sessionFolderPath}]`
+        );
       }
     }
   } catch (err) {
-    console.log((err as Error).message);
-    console.log("failed to create folder ❌");
-    return { newPath, error: true };
+    if (import.meta.env.DEV) {
+      console.log(`🟥 ERROR: ${(err as Error).message}`);
+      console.log("🟥 Failed to create session folder");
+    }
+    return { sessionFolderPath, error: true };
   }
-  return { newPath, error: false };
+  return { sessionFolderPath, error: false };
 };
 
-/** used to save progress client info to json file */
-export const saveInfoToJson = (sessionID: string, data: any) => {
+/** used to save session info to json file */
+export const saveInfoToJson = (
+  sessionID: string,
+  data: yt.Progress.SessionInfoType
+) => {
   const filePath = path.resolve(tempFolderPath, sessionID, "info.json");
 
   try {
@@ -265,77 +277,106 @@ export const saveInfoToJson = (sessionID: string, data: any) => {
     });
 
     if (import.meta.env.DEV) {
-      console.log("Write client info succesfully to (info.json) ✅");
+      console.log("🟩 Write client info succesfully to (info.json)");
     }
   } catch (err) {
     if (import.meta.env.DEV) {
       console.log(
-        `ERROR: occurred while writing data to (info.json) ❓ -> ${
+        `🟥 ERROR: occurred while writing data to (info.json) -> ${
           (err as Error).message
         }`
       );
     }
+    return false;
+  }
+  return true;
+};
+
+export const readSessionFile = (
+  sessionID: string
+): { success: boolean; sessionInfo?: yt.Progress.SessionInfoType } => {
+  try {
+    const filePath = path.resolve(tempFolderPath, sessionID, "info.json");
+    const sessionInfo = JSON.parse(
+      fs.readFileSync(filePath, { encoding: "utf-8" })
+    ) as yt.Progress.SessionInfoType;
+
+    if (import.meta.env.DEV) {
+      console.log("🟩 Read session info succesfully");
+    }
+
+    return { success: true, sessionInfo };
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.log(
+        `🟥 Failed to read session info file -> ${(err as Error).message}`
+      );
+    }
+    return { success: false };
   }
 };
 
 /** update the session progress info and prepare it for the client request */
 export const updateSessionProgress = (
   stage: yt.Progress.ProgressStagesType,
-  request: yt.Download.VideoDownloadRequestType,
-  progressInfo: unknown
+  sessionID: string,
+  progressInfo?: unknown
 ) => {
-  const sessionReq = request as typeof request & yt.Progress.RequestSessionType;
+  const result = readSessionFile(sessionID);
 
-  switch (stage) {
-    case "download": {
-      const { total, finish } =
-        progressInfo as yt.Progress.DownloadProgressStateType;
-      sessionReq.session.vidl.progressState.downloadProgressState = {
-        total,
-        finish,
-      };
-      const clientInfo: yt.Progress.ClientInfoType = {
-        state: "progress",
-        msg: `preparing files (${finish}/${total})`,
-        progress: Math.floor((finish / total) * 100),
-      };
-      sessionReq.session.vidl.clientInfo = clientInfo;
-      saveInfoToJson(sessionReq.sessionID, clientInfo);
-      break;
+  if (result.success) {
+    const newSessionInfo = new SessionInfo(result.sessionInfo!);
+
+    switch (stage) {
+      case "download": {
+        // update the downloadProgressState (finish) property
+        newSessionInfo.___finish = newSessionInfo.___finish + 1;
+        const { total, finish } = newSessionInfo.__downloadProgressState;
+
+        // update the clientInfo
+        newSessionInfo._clientInfo = {
+          state: "progress",
+          msg: `preparing...(${finish}/${total})`,
+          progress: Math.floor((finish / total) * 100),
+        };
+        break;
+      }
+
+      case "convert": {
+        const { size, timeMark } =
+          progressInfo as yt.Progress.ConvertProgressStateType;
+        newSessionInfo.__convertProgressState = {
+          size,
+          timeMark,
+        };
+        newSessionInfo._clientInfo = {
+          state: "progress",
+          msg: `converting files (${getFileSize(size)})`,
+          progress: getConvertingStateProgress(
+            timeMark,
+            newSessionInfo.__duration
+          ),
+        };
+        break;
+      }
+
+      case "duration": {
+        newSessionInfo.__duration = (
+          progressInfo as { duration: string }
+        ).duration;
+        break;
+      }
     }
 
-    case "convert": {
-      const { size, timeMark } =
-        progressInfo as yt.Progress.MergeProgressStateType;
-      sessionReq.session.vidl.progressState.mergeProgressState = {
-        size,
-        timeMark,
-      };
-      const { duration } = sessionReq.session.vidl.progressState;
-      const clientInfo: yt.Progress.ClientInfoType = {
-        state: "progress",
-        msg: `converting files (${getFileSize(size)})`,
-        progress: getMergingStateProgress(timeMark, duration),
-      };
-      sessionReq.session.vidl.clientInfo = clientInfo;
-      saveInfoToJson(sessionReq.sessionID, clientInfo);
-      break;
-    }
+    saveInfoToJson(sessionID, newSessionInfo.data);
 
-    case "duration": {
-      sessionReq.session.vidl.progressState.duration = (
-        progressInfo as { duration: string }
-      ).duration;
-      break;
+    if (import.meta.env.DEV) {
+      // console.clear();
+      console.log("---------------------------------------------");
+      console.log("progress-state:", newSessionInfo.data.progressState);
+      console.log("client-info:", newSessionInfo.data.clientInfo);
+      console.log("---------------------------------------------");
     }
-  }
-
-  if (import.meta.env.DEV) {
-    console.clear();
-    console.log("---------------------------------------------");
-    console.log("progress-state:", sessionReq.session.vidl.progressState);
-    console.log("client-info:", sessionReq.session.vidl.clientInfo);
-    console.log("---------------------------------------------");
   }
 };
 
@@ -344,20 +385,20 @@ export const downloadFile = (
   path: string,
   videoInfo: ytdl.videoInfo,
   format: ytdl.videoFormat,
-  request: yt.Download.VideoDownloadRequestType
+  sessionID: string
 ): Promise<{ ok: boolean }> => {
   return new Promise((resolve) => {
     const writeStream = fs.createWriteStream(path);
     const type = format.hasVideo ? "Video" : "Audio";
-    const sessionReq = request as typeof request &
-      yt.Progress.RequestSessionType;
     let failed = false;
 
     ytdl
       .downloadFromInfo(videoInfo, { format: format })
-      .on("error", () => {
+      .on("error", (err) => {
         if (import.meta.env.DEV) {
-          console.log(`Error: ytdl failed to download ${type} file ❓`);
+          console.log(
+            `🟥 Error: ytdl failed to download ${type} file -> ${err.message}`
+          );
         }
         failed = true;
         writeStream.end(); // stop the stream
@@ -367,30 +408,23 @@ export const downloadFile = (
       .on("finish", () => {
         if (!failed) {
           writeStream.end(); // stop the stream
-          // only update the downloadProgressState (finish) property
-          const currentDownloadProgress =
-            sessionReq.session.vidl.progressState.downloadProgressState;
-          const progressInfo: yt.Progress.DownloadProgressStateType = {
-            ...currentDownloadProgress,
-            finish: currentDownloadProgress.finish + 1,
-          };
-          updateSessionProgress("download", request, progressInfo);
+          updateSessionProgress("download", sessionID);
           if (import.meta.env.DEV) {
-            console.log(`${type} downloaded successfully ⬇️`);
+            console.log(`⬇️  ${type} downloaded successfully`);
           }
           resolve({ ok: true });
         }
       })
       .on("error", (err) => {
         if (import.meta.env.DEV) {
-          console.log(`${type} write failed ❌ -> (${err.message})`);
+          console.log(`🟥 ${type} write failed -> (${err.message})`);
         }
         writeStream.end(); // stop the stream
         resolve({ ok: false });
       })
       .on("close", () => {
         if (import.meta.env.DEV) {
-          console.log(`${type} stream closed ✅`);
+          console.log(`🟩 ${type} stream closed`);
           console.log("--------------------------");
         }
       });

@@ -127,21 +127,33 @@ export namespace yt {
   // -------------------------- Download Start -----------------------------------
   namespace Download {
     // video | audio
-    type VideoDownloadRequestData = { searchUrl: string; quality: number };
+    type VideoDownloadRequestData = {
+      searchUrl: string;
+      quality: number;
+      sessionID: string;
+    };
     type VideoDownloadRequestType = Request<any, any, VideoDownloadRequestData>;
 
     // list (not used ❌)
+    // ----------------------------------------------------
     type ListDownloadRequestData = { listUrl: string };
     type ListDownloadRequestType = Request<any, any, ListDownloadRequestData>;
+    // ----------------------------------------------------
   }
   // --------------------------- Download End ------------------------------------
 
   // ---------------------------- Progress Start ----------------------------------
   namespace Progress {
+    type OpenDownloadSessionResponse = {
+      sessionID: string;
+      progressInfo: ClientInfoType;
+    };
+
     type ProgressStagesType = "download" | "convert" | "duration";
+    type ClientInfoStateType = "fetch" | "progress" | "error";
 
     type ClientInfoType = {
-      state: "fetch" | "progress" | "error"; // progress state
+      state: ClientInfoStateType; // progress state
       msg: string;
       progress: number;
     };
@@ -150,25 +162,20 @@ export namespace yt {
       total: number; // total files to download
       finish: number; // downloaded files
     };
-    type MergeProgressStateType = {
+    type ConvertProgressStateType = {
       size: number; // current ffmpeg progress (targetsize)
       timeMark: string; // current ffmpeg progress (timemark)
     };
-
     type ProgressStateType = {
       duration: string; // file total time (hh:mm:ss.xx)
       downloadProgressState: DownloadProgressStateType;
-      mergeProgressState: MergeProgressStateType;
+      convertProgressState: ConvertProgressStateType;
     };
 
-    type RequestSessionType = Request & {
-      session: {
-        vidl: {
-          connected: boolean;
-          clientInfo: ClientInfoType;
-          progressState: ProgressStateType;
-        };
-      };
+    type SessionInfoType = {
+      sessionID: string;
+      clientInfo: ClientInfoType;
+      progressState: ProgressStateType;
     };
   }
   // ----------------------------- Progress End -----------------------------------

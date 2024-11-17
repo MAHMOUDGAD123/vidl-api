@@ -1,8 +1,5 @@
 import ytdl from "@distube/ytdl-core";
 import type { CorsOptions } from "cors";
-import type { SessionOptions } from "express-session";
-import session from "express-session";
-import MemoryStore from "memorystore";
 
 export const SESSION_LIFE = 3 * 60 * 60 * 1000; // 3hrs
 export const tempFolderName = "tmp";
@@ -429,19 +426,4 @@ export const CORS_OPTIONS: CorsOptions = {
   credentials: true,
   methods: ["GET", "POST"],
   optionsSuccessStatus: 200,
-};
-
-const MemStore = MemoryStore(session);
-
-export const SESSION_CONFIG: SessionOptions = {
-  secret: "VIDL_SESSION",
-  saveUninitialized: false,
-  resave: false,
-  name: "vidl_connected",
-  cookie: {
-    maxAge: SESSION_LIFE,
-  },
-  store: new MemStore({
-    checkPeriod: SESSION_LIFE,
-  }),
 };

@@ -1,12 +1,13 @@
 import { Router } from "express";
 import {
   getSessionProgressHandler,
-  downloadSessionInfoLogger,
   downloadSessionCleaner,
   ytListDownloadHandler,
   ytSmartSearchHandler,
   ytVideoDownloadHandler,
   ytAudioDownloadHandler,
+  videoUrlValidator,
+  sessionFolderValidator,
 } from "./ytHandlers";
 
 const router: Router = Router();
@@ -15,23 +16,29 @@ const router: Router = Router();
 router.post("/smart-search", ytSmartSearchHandler);
 
 // progress
-router.get("/progress-info", getSessionProgressHandler);
+router.post("/progress-info", getSessionProgressHandler);
 
-// log the session information before download
-router.use(downloadSessionInfoLogger);
-
-// cleaner
-// router.use(downloadSessionCleaner);
-
-/* Downloads */
+/************************************ Downloads ************************************/
 
 // video
-router.post("/video-download", downloadSessionCleaner, ytVideoDownloadHandler);
+router.post(
+  "/video-download",
+  videoUrlValidator,
+  sessionFolderValidator,
+  downloadSessionCleaner,
+  ytVideoDownloadHandler
+);
 
 // audio
-router.post("/audio-download", downloadSessionCleaner, ytAudioDownloadHandler);
+router.post(
+  "/audio-download",
+  videoUrlValidator,
+  sessionFolderValidator,
+  downloadSessionCleaner,
+  ytAudioDownloadHandler
+);
 
 // list ❌
-router.post("/list-download", downloadSessionCleaner, ytListDownloadHandler);
+router.post("/list-download", ytListDownloadHandler);
 
 export default router;
