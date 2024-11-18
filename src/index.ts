@@ -2,8 +2,7 @@ import express, { type Express, type Response, type Request } from "express";
 import cors from "cors";
 import routes from "./routes/router";
 import cookieParser from "cookie-parser";
-// import session from "express-session";
-import { CORS_OPTIONS /*, SESSION_CONFIG */ } from "./utils/constants";
+import { CORS_OPTIONS } from "./utils/constants";
 
 const app: Express = express();
 

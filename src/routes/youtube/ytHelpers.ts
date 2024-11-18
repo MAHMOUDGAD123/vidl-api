@@ -1,10 +1,10 @@
 import ytdl from "@distube/ytdl-core";
 import fs from "fs";
 import path from "path";
-import type { yt } from "../../types/youtube-types";
-import { SessionInfo } from "../../utils/classes";
+import type { yt } from "@_types/youtube-types";
+import { SessionInfo } from "@_utils/classes";
 import { tempFolderPath, VITE_MODE } from "./ytHandlers";
-import { agent } from "../../utils/constants";
+import { agent } from "@_utils/constants";
 
 /**
  * filter the (info.formats) and get all qualities:

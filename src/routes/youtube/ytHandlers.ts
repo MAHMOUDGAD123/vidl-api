@@ -5,10 +5,10 @@ import fs, { rm, unlink } from "fs";
 import ffmpeg from "fluent-ffmpeg";
 import { path as ffmpegPath } from "@ffmpeg-installer/ffmpeg";
 import type { NextFunction, Request, Response } from "express";
-import type { yt } from "../../types/youtube-types";
-import { agent, tempFolderName } from "../../utils/constants";
 import { v7 as uuidv7 } from "uuid";
-import { SessionInfo } from "../../utils/classes";
+import type { yt } from "@_types/youtube-types";
+import { agent, tempFolderName } from "@_utils/constants";
+import { SessionInfo } from "@_utils/classes";
 import {
   getVideoFormats,
   getAudioFormats,

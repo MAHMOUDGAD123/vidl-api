@@ -1,4 +1,4 @@
-import type { yt } from "../types/youtube-types";
+import type { yt } from "@_types/youtube-types";
 
 /** session info class */
 export class SessionInfo {

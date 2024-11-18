@@ -2,6 +2,7 @@ import { defineConfig, type CorsOptions, type UserConfig } from "vite";
 import { vitePluginNode } from "./plugins/vite-node-plugin";
 import { viteMockServerPlugin } from "./plugins/vite-mock-server-plugin";
 import { CORS_OPTIONS } from "./src/utils/constants";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   base: "./",
@@ -24,5 +25,5 @@ export default defineConfig({
     port: 3000,
     cors: CORS_OPTIONS as CorsOptions,
   },
-  plugins: [...vitePluginNode(), viteMockServerPlugin()],
+  plugins: [...vitePluginNode(), viteMockServerPlugin(), tsconfigPaths()],
 } satisfies UserConfig);

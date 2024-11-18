@@ -5,8 +5,13 @@
     /* Language and Environment */
     "target": "ESNext",
     "importHelpers": true,
+    "baseUrl": "./",
     "paths": {
-      "tslib": ["./node_modules/tslib/tslib.d.ts"]
+      "tslib": ["node_modules/tslib/tslib.d.ts"],
+      "@_plugins/*": ["plugins/*"],
+      "@_routes/*": ["src/routes/*"],
+      "@_utils/*": ["src/utils/*"],
+      "@_types/*": ["src/types/*"]
     },
     "lib": ["esnext"],
 
