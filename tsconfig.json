@@ -16,10 +16,7 @@
     "lib": ["esnext"],
 
     /* Modules */
-    /*"module": "CommonJS",*/
-    /*"moduleResolution": "Node",*/
     "rootDir": "./src",
-
     "skipDefaultLibCheck": false,
     "sourceMap": true,
     "preserveWatchOutput": true,
