@@ -427,3 +427,11 @@ export const downloadFile = (
       });
   });
 };
+
+// https://youtube.com/playlist?list=PLTo6svdhIL1cxS4ffGueFpVCF756ip-ab❌&si=06EBBYniIiqklSMr❌
+/** remove the (si) part from the query string */
+export const validatePlaylistURL = (url: string) => {
+  const _URL = new URL(url);
+  _URL.searchParams.delete("si");
+  return _URL.href;
+};

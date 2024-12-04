@@ -19,6 +19,7 @@ import {
   getAudioFormat_safe,
   getVideoFormat_safe,
   readSessionFile,
+  validatePlaylistURL,
 } from "./ytHelpers";
 
 export const VITE_MODE = import.meta.env.DEV;
@@ -63,7 +64,7 @@ export const ytSmartSearchHandler = async (
         type: "video",
       });
       // [2]: search as playlist
-    } else if (YouTube.validate(searchUrl, "PLAYLIST")) {
+    } else if (YouTube.validate(validatePlaylistURL(searchUrl), "PLAYLIST")) {
       if (VITE_MODE) {
         console.log("✅ Valid youtube playlist url\n");
       }
