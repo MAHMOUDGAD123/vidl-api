@@ -1,0 +1,1 @@
+{"root":["./src/constants.ts","./src/index.ts","./src/vite-env.d.ts","./src/routes/router.ts","./src/routes/youtube/youtube.ts","./src/routes/youtube/ythandlers.ts","./src/routes/youtube/ythelpers.ts","./src/types/youtube-types.d.ts"],"version":"5.6.2"}
