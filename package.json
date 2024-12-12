@@ -8,7 +8,7 @@
     "start": "node --no-deprecation ./api/index.js",
     "dev": "vite",
     "build": "vite build",
-    "vercel-build": "vercel building...",
+    "vercel-build": "echo building...",
     "esbuild:build": "npm run clean && node ./esbuild.config.mjs",
     "nodemon:dev": "nodemon"
   },
