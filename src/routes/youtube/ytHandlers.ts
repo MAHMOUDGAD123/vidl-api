@@ -37,8 +37,6 @@ export const ytSmartSearchHandler = async (
     body: { searchUrl },
   } = request;
 
-  let videoInfo = null;
-
   try {
     // [1]: search as a video
     if (ytdl.validateURL(searchUrl)) {
@@ -47,7 +45,8 @@ export const ytSmartSearchHandler = async (
       }
 
       // video info
-      videoInfo = await ytdl.getInfo(searchUrl, {
+      const videoInfo = await ytdl.getInfo(searchUrl, {
+        playerClients: ["IOS"],
         agent,
       });
       const formats = videoInfo.formats;
@@ -101,7 +100,6 @@ export const ytSmartSearchHandler = async (
       });
     }
   } catch (err) {
-    console.log("🟩 VideoID:", videoInfo?.videoDetails.videoId);
     response.status(200).json({ errMsg: (err as Error).message, type: "none" });
   }
 };
