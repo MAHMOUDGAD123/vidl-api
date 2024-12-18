@@ -20,7 +20,7 @@
   "license": "ISC",
   "description": "audio & video downloader",
   "dependencies": {
-    "@distube/ytdl-core": "^4.15.1",
+    "@distube/ytdl-core": "^4.15.8",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -43,7 +43,7 @@
     "rimraf": "^6.0.1",
     "tslib": "^2.7.0",
     "typescript": "^5.6.2",
-    "vite": "^5.4.10",
+    "vite": "^6.0.3",
     "vite-plugin-node": "^4.0.0",
     "vite-tsconfig-paths": "^5.1.2"
   }

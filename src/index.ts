@@ -28,7 +28,7 @@ if (import.meta.env.DEV) {
 }
 
 if (import.meta.env.PROD) {
-  // console.log("Production Mode ✅");
+  console.log("Production Mode ✅");
   const PORT = process.env.PORT ?? 3000;
   app.listen(PORT, () => {
     console.log(`Server Running On Port ${PORT}`);
