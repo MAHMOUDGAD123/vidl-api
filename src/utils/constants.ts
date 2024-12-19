@@ -421,7 +421,7 @@ const cookies = [
 
 // export const agent = ytdl.createAgent(cookies);
 export const agent = ytdl.createProxyAgent(
-  { uri: "http://181.215.253.112:5001", bodyTimeout: 20000 },
+  { uri: "http://181.215.253.112:5001" },
   cookies
 );
 
