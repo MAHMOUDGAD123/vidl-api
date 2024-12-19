@@ -43,10 +43,8 @@ export const ytSmartSearchHandler = async (
       if (VITE_MODE) {
         console.log("✅ Valid youtube video url\n");
       }
-
       // video info
       const videoInfo = await ytdl.getInfo(searchUrl, {
-        playerClients: ["IOS"],
         agent,
       });
       const formats = videoInfo.formats;
@@ -296,7 +294,6 @@ export const ytVideoDownloadHandler = async (
   try {
     // get video info
     const videoInfo = await ytdl.getInfo(searchUrl, {
-      playerClients: ["IOS"],
       agent,
     });
     const formats = videoInfo.formats;
@@ -470,7 +467,6 @@ export const ytAudioDownloadHandler = async (
   try {
     // get video info
     const videoInfo = await ytdl.getInfo(searchUrl, {
-      playerClients: ["IOS"],
       agent,
     });
     const formats = videoInfo.formats;

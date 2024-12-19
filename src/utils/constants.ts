@@ -419,11 +419,15 @@ const cookies = [
   },
 ];
 
-export const agent = ytdl.createAgent(cookies);
+// export const agent = ytdl.createAgent(cookies);
+export const agent = ytdl.createProxyAgent(
+  { uri: "http://181.215.253.112:5001", bodyTimeout: 20000 },
+  cookies
+);
 
 export const CORS_OPTIONS: CorsOptions = {
   origin: [/https:\/\/vidl-client.vercel.app/, /http:\/\/localhost:\d{4}/],
-  // credentials: true,
+  credentials: true,
   methods: ["GET", "POST"],
   optionsSuccessStatus: 200,
 };
