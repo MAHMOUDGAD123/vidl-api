@@ -1,7 +1,7 @@
 import ytdl from "@distube/ytdl-core";
 import type { CorsOptions } from "cors";
 
-export const SESSION_LIFE = 3 * 60 * 60 * 1000; // 3hrs
+// export const SESSION_LIFE = 3 * 60 * 60 * 1000; // 3hrs
 export const tempFolderName = "tmp";
 
 const cookies = [
