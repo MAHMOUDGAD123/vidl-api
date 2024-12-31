@@ -21,7 +21,7 @@
   "license": "ISC",
   "description": "audio & video downloader",
   "dependencies": {
-    "@distube/ytdl-core": "^4.15.7",
+    "@distube/ytdl-core": "4.15.7",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
