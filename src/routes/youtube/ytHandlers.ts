@@ -274,8 +274,11 @@ export const ytVideoDownloadHandler = async (
     const audioFormat = getAudioFormats(formats)[0];
 
     console.log("----------------------------------");
-    console.log("video quality:", targetFormat?.qualityLabel);
-    console.log("audio quality:", audioFormat?.audioBitrate);
+    console.log(
+      `video quality: ${
+        targetFormat?.qualityLabel
+      } (${targetFormat?.container.toLocaleUpperCase()}) -> (MP4)`
+    );
     console.log("----------------------------------");
 
     if (audioFormat === undefined) {
@@ -327,15 +330,26 @@ export const ytVideoDownloadHandler = async (
     }
 
     const outFilePath = path.resolve(tempFolder, `output.mp4`);
+    const videoCodec = targetFormat.container === "mp4" ? "copy" : "libx264";
+    const audioCodec = "aac";
+    const videoEncodingOptions =
+      targetFormat.container === "mp4" ? [] : ["-crf", "18", "-preset", "slow"]; // Optional: adjust CRF and preset
 
     // merge video & audio in one file
     ffmpeg(videoFilePath)
-      .format("mp4")
+      .inputOption("-hwaccel", "cuda") // Enable CUDA hardware acceleration for decoding
+      .input(audioFilePath)
       .audioBitrate(audioFormat.audioBitrate!)
-      .mergeAdd(audioFilePath)
+      .videoCodec(videoCodec) // Apply the determined video codec
+      .audioCodec(audioCodec) // Apply the determined audio codec
+      .outputOptions(videoEncodingOptions) // adjust CRF and preset
+      .outputOption("-c:v", videoCodec) // Final video codec option (copy or encoding)
+      .outputOption("-c:a", audioCodec) // Final audio codec option (AAC)
+      .outputOption("-shortest") // Ensure output duration matches the shortest stream (audio/video)
+      .format("mp4")
       .saveToFile(outFilePath)
       .on("start", () => {
-        console.log("⚒️  Start converting...");
+        console.log(`⚒️ Start converting (${targetFormat.container}) -> (MP4)`);
       })
       .on("codecData", (codecData) => {
         // update the duration only
@@ -384,7 +398,9 @@ export const ytVideoDownloadHandler = async (
         });
       })
       .on("error", (err) => {
-        console.error(`🟥 ffmpeg failed to convert file -> ${err.message}`);
+        console.error(
+          `🟥 ffmpeg failed to convert the file -> MP4 : ${err.message}`
+        );
         response.sendStatus(205);
       });
   } catch (err) {
@@ -463,13 +479,16 @@ export const ytAudioDownloadHandler = async (
 
     const outFilePath = path.resolve(tempFolder, `output.mp3`);
 
-    // merge video & audio in one file
+    // convert to MP3
     ffmpeg(audioFilePath)
+      .outputOption("-c:a", "libmp3lame") // Use LAME MP3 encoder
       .format("mp3")
       .audioBitrate(targetFormat.audioBitrate!)
       .saveToFile(outFilePath)
       .on("start", () => {
-        console.log("⚒️  Start converting...");
+        console.log(
+          `⚒️  Start converting (${targetFormat.container.toLocaleUpperCase()}) -> (MP3)`
+        );
       })
       .on("codecData", (codecData) => {
         // update the duration only
@@ -511,7 +530,9 @@ export const ytAudioDownloadHandler = async (
         });
       })
       .on("error", (err) => {
-        console.error(`🟥 ffmpeg failed to convert file -> ${err.message}`);
+        console.error(
+          `🟥 ffmpeg failed to convert the file -> MP3 : ${err.message}`
+        );
         response.sendStatus(205);
       });
   } catch (err) {
