@@ -116,11 +116,13 @@ export namespace yt {
     };
     // ---------------------------------------------------------
 
-    type SearchResponseType = Response<{
+    type SearchResponseData = {
       info?: ListInfo | VideoInfo;
       type: "video" | "list" | "none";
       errMsg?: string;
-    }>;
+    };
+
+    type SearchResponseType = Response<SearchResponseData>;
   }
   // --------------------------- Search End ---------------------------------
 

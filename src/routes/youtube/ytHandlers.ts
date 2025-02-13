@@ -22,6 +22,12 @@ import {
   validatePlaylistURL,
   removeSessionFolder,
 } from "./ytHelpers";
+import { createCache } from "cache-manager";
+import { CACHE } from "@/utils/constants";
+
+const memCache = createCache({
+  ttl: CACHE.TTL,
+});
 
 export const tempFolderPath = import.meta.env.DEV
   ? tempFolderName
@@ -43,6 +49,18 @@ export const ytSmartSearchHandler = async (
     // [1]: search as a video
     if (ytdl.validateURL(searchUrl)) {
       console.log("✅ Valid youtube video url\n");
+      // cache lookup first
+      const cacheKey = ytdl.getURLVideoID(searchUrl);
+      const cachedData = (await memCache.get(
+        cacheKey
+      )) as yt.Search.SearchResponseData;
+
+      if (cachedData) {
+        response.status(200).json(cachedData);
+        console.log("\x1b[36m\x1b[1m[Served From Cache]\x1b[0m\x1b[0m\n");
+        return;
+      }
+
       // video info
       const videoInfo = await ytdl.getInfo(searchUrl, {
         agent,
@@ -53,24 +71,43 @@ export const ytSmartSearchHandler = async (
       const filteredVideoFormats = getVideoFormats(formats);
       const filteredAudioFormats = getAudioFormats(formats);
 
-      response.status(200).json({
+      const responseData: yt.Search.SearchResponseData = {
         info: {
           videoFormats: filteredVideoFormats,
           audioFormats: filteredAudioFormats,
           videoDetails: videoInfo.videoDetails,
         },
         type: "video",
-      });
+      };
+
+      // save to cache
+      memCache.set(cacheKey, responseData);
+      response.status(200).json(responseData);
+
       // [2]: search as playlist
     } else if (YouTube.validate(validatePlaylistURL(searchUrl), "PLAYLIST")) {
       console.log("✅ Valid youtube playlist url\n");
+
+      const cacheKey = searchUrl.match(YouTube.Regex.PLAYLIST_ID)?.[0];
+
+      if (cacheKey) {
+        const cachedData = (await memCache.get(
+          cacheKey
+        )) as yt.Search.SearchResponseData;
+
+        if (cachedData) {
+          response.status(200).json(cachedData);
+          console.log("\x1b[36m\x1b[1m[Served From Cache]\x1b[0m\x1b[0m\n");
+          return;
+        }
+      }
 
       const listInfo = await YouTube.getPlaylist(searchUrl, {
         fetchAll: true,
         limit: Infinity,
       });
 
-      response.status(200).json({
+      const responseData: yt.Search.SearchResponseData = {
         info: {
           id: listInfo.id,
           videoCount: listInfo.videoCount,
@@ -87,7 +124,13 @@ export const ytSmartSearchHandler = async (
           fake: listInfo.fake,
         },
         type: "list",
-      });
+      };
+
+      if (cacheKey) {
+        // save to cache
+        memCache.set(cacheKey, responseData);
+      }
+      response.status(200).json(responseData);
       // invalid url
     } else {
       response.status(200).json({

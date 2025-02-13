@@ -426,8 +426,12 @@ export const agent = ytdl.createAgent(cookies);
 // );
 
 export const CORS_OPTIONS: CorsOptions = {
-  origin: [/https:\/\/vidl-client.vercel.app/, /http:\/\/localhost:\d{4}/],
+  origin: [/https:\/\/vidl-client\.vercel\.app/, /http:\/\/localhost:\d{4}/],
   credentials: true,
   methods: ["GET", "POST"],
   optionsSuccessStatus: 200,
+};
+
+export const CACHE: { TTL: number } = {
+  TTL: 10 * 60 * 1000, // 10 minutes
 };
