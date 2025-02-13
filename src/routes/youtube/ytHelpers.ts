@@ -244,9 +244,11 @@ export const createSessionFolder = (
     } else {
       fs.mkdirSync(sessionFolderPath, { recursive: true });
 
-      console.log(
-        `🟩 Session folder created successfully [${sessionFolderPath}]`
-      );
+      if (import.meta.env.DEV) {
+        console.log(
+          `🟩 Session folder created successfully [${sessionFolderPath}]`
+        );
+      }
     }
   } catch (err) {
     console.log(`🟥 ${(err as Error).message}`);
@@ -271,11 +273,13 @@ export const saveInfoToJson = (
 
     console.log("🟩 Write client info succesfully to (info.json)");
   } catch (err) {
-    console.log(
-      `🟥 ERROR: occurred while writing data to (info.json) -> ${
-        (err as Error).message
-      }`
-    );
+    if (import.meta.env.DEV) {
+      console.log(
+        `🟥 ERROR: occurred while writing data to (info.json) -> ${
+          (err as Error).message
+        }`
+      );
+    }
     return false;
   }
   return true;
@@ -294,9 +298,11 @@ export const readSessionFile = (
 
     return { success: true, sessionInfo };
   } catch (err) {
-    console.log(
-      `🟥 Failed to read session info file -> ${(err as Error).message}`
-    );
+    if (import.meta.env.DEV) {
+      console.log(
+        `🟥 Failed to read session info file -> ${(err as Error).message}`
+      );
+    }
     return { success: false };
   }
 };

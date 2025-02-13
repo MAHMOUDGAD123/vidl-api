@@ -316,13 +316,15 @@ export const ytVideoDownloadHandler = async (
     // get highest audio format (160k) default if exists
     const audioFormat = getAudioFormats(formats)[0];
 
-    console.log("----------------------------------");
-    console.log(
-      `video quality: ${
-        targetFormat?.qualityLabel
-      } (${targetFormat?.container.toLocaleUpperCase()}) -> (MP4)`
-    );
-    console.log("----------------------------------");
+    if (import.meta.env.DEV) {
+      console.log("----------------------------------");
+      console.log(
+        `video quality: ${
+          targetFormat?.qualityLabel
+        } (${targetFormat?.container.toLocaleUpperCase()}) -> (MP4)`
+      );
+      console.log("----------------------------------");
+    }
 
     if (audioFormat === undefined) {
       // this is kind of impossible too 😱❓(just to be more safe)
@@ -430,9 +432,11 @@ export const ytVideoDownloadHandler = async (
         // send to client
         response.status(200).download(outFilePath, (err) => {
           if (err) {
-            console.error(
-              `🟥 Failed to send file to the client -> ${err.message}`
-            );
+            if (import.meta.env.DEV) {
+              console.error(
+                `🟥 Failed to send file to the client -> ${err.message}`
+              );
+            }
             removeSessionFolder(sessionID);
             response.sendStatus(205);
             return;
@@ -441,9 +445,11 @@ export const ytVideoDownloadHandler = async (
         });
       })
       .on("error", (err) => {
-        console.error(
-          `🟥 ffmpeg failed to convert the file -> MP4 : ${err.message}`
-        );
+        if (import.meta.env.DEV) {
+          console.error(
+            `🟥 ffmpeg failed to convert the file -> MP4 : ${err.message}`
+          );
+        }
         response.sendStatus(205);
       });
   } catch (err) {
@@ -529,9 +535,11 @@ export const ytAudioDownloadHandler = async (
       .audioBitrate(targetFormat.audioBitrate!)
       .saveToFile(outFilePath)
       .on("start", () => {
-        console.log(
-          `⚒️  Start converting (${targetFormat.container.toLocaleUpperCase()}) -> (MP3)`
-        );
+        if (import.meta.env.DEV) {
+          console.log(
+            `⚒️  Start converting (${targetFormat.container.toLocaleUpperCase()}) -> (MP3)`
+          );
+        }
       })
       .on("codecData", (codecData) => {
         // update the duration only
@@ -562,9 +570,11 @@ export const ytAudioDownloadHandler = async (
         // send to client
         response.status(200).download(outFilePath, (err) => {
           if (err) {
-            console.error(
-              `🟥 Failed to send file to the client -> ${err.message}`
-            );
+            if (import.meta.env.DEV) {
+              console.error(
+                `🟥 Failed to send file to the client -> ${err.message}`
+              );
+            }
             removeSessionFolder(sessionID);
             response.sendStatus(205);
             return;
@@ -573,9 +583,11 @@ export const ytAudioDownloadHandler = async (
         });
       })
       .on("error", (err) => {
-        console.error(
-          `🟥 ffmpeg failed to convert the file -> MP3 : ${err.message}`
-        );
+        if (import.meta.env.DEV) {
+          console.error(
+            `🟥 ffmpeg failed to convert the file -> MP3 : ${err.message}`
+          );
+        }
         response.sendStatus(205);
       });
   } catch (err) {
