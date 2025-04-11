@@ -7,6 +7,7 @@
     "clean": "rimraf ./api",
     "start": "node --no-deprecation ./api/index.js",
     "dev": "vite",
+    "local:dev": "vite --host",
     "build": "vite build",
     "vercel-build": "echo vercel building...",
     "esbuild:build": "npm run clean && node ./esbuild.config.mjs",
@@ -21,7 +22,7 @@
   "license": "ISC",
   "description": "audio & video downloader",
   "dependencies": {
-    "@distube/ytdl-core": "^4.16.4",
+    "@distube/ytdl-core": "^4.16.8",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "cache-manager": "^6.4.0",
     "cookie-parser": "^1.4.7",

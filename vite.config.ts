@@ -27,12 +27,14 @@ export default defineConfig({
   preview: {
     port: 3000,
     cors: CORS_OPTIONS as CorsOptions,
+    host: true,
   },
   server: {
     // vite server configs, for details see [vite doc](https://vitejs.dev/config/#server-host)
     hmr: true,
     port: 3000,
     cors: CORS_OPTIONS as CorsOptions,
+    host: true,
   },
   plugins: [
     ...vitePluginNode(),
