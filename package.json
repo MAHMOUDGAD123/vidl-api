@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "clean": "rimraf ./api",
-    "start": "node --no-deprecation ./api/index.js",
+    "start": "node --no-warnings ./api/index.js",
     "dev": "vite",
     "local:dev": "vite --host",
     "build": "vite build",

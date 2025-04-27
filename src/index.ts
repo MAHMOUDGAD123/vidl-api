@@ -29,6 +29,7 @@ if (import.meta.env.PROD) {
   app.listen(PORT, () => {
     console.log(`Server Running On Port ${PORT}`);
   });
+  process.removeAllListeners("warning");
 } else {
   console.log("Development Mode ✅");
 }
