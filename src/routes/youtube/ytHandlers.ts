@@ -22,12 +22,7 @@ import {
   validatePlaylistURL,
   removeSessionFolder,
 } from "./ytHelpers";
-import { createCache } from "cache-manager";
-import { CACHE } from "@/utils/constants";
-
-const memCache = createCache({
-  ttl: CACHE.TTL,
-});
+import { memCache } from "@/utils/cache";
 
 export const tempFolderPath = import.meta.env.DEV
   ? tempFolderName

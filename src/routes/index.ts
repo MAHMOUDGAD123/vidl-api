@@ -1,5 +1,5 @@
 import { Router } from "express";
-import youtubeRouter from "./youtube/youtube";
+import youtubeRouter from "./youtube";
 import { openDownloadSessionHandler } from "./youtube/ytHandlers";
 
 const router: Router = Router();

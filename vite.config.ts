@@ -1,7 +1,7 @@
 import { defineConfig, type CorsOptions, type UserConfig } from "vite";
 import { vitePluginNode } from "./plugins/vite-node-plugin";
 import { viteMockServerPlugin } from "./plugins/vite-mock-server-plugin";
-import { removeConsolePlugin } from "./plugins/remove-console-log";
+import { removeConsolePlugin } from "./plugins/vite-remove-console-plugin";
 import { CORS_OPTIONS } from "./src/utils/constants";
 import tsconfigPaths from "vite-tsconfig-paths";
 import path from "path";

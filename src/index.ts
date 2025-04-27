@@ -1,6 +1,6 @@
 import express, { type Express, type Response } from "express";
 import cors from "cors";
-import routes from "./routes/router";
+import routes from "./routes";
 import cookieParser from "cookie-parser";
 import { CORS_OPTIONS } from "./utils/constants";
 
