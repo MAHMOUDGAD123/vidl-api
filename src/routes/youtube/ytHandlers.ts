@@ -59,12 +59,6 @@ export const ytSmartSearchHandler = async (
       // video info
       const videoInfo = await ytdl.getInfo(searchUrl, {
         agent,
-        requestOptions: {
-          headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-            "Accept-Language": "en-US,en;q=0.9",
-          },
-        },
       });
       const formats = videoInfo.formats;
 
@@ -300,12 +294,6 @@ export const ytVideoDownloadHandler = async (
     // get video info
     const videoInfo = await ytdl.getInfo(searchUrl, {
       agent,
-      requestOptions: {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-          "Accept-Language": "en-US,en;q=0.9",
-        },
-      },
     });
     const formats = videoInfo.formats;
 
@@ -478,12 +466,6 @@ export const ytAudioDownloadHandler = async (
     // get video info
     const videoInfo = await ytdl.getInfo(searchUrl, {
       agent,
-      requestOptions: {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-          "Accept-Language": "en-US,en;q=0.9",
-        },
-      },
     });
     const formats = videoInfo.formats;
 

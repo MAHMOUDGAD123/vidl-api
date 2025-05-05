@@ -11,8 +11,8 @@ import { agent } from "@/utils/constants";
  * { 2160p - 1440p - 1080p - 720p - 480p - 360p - 240p - 144p }
  */
 export const getVideoFormats = (
-  infoFormats: ytdl.videoFormat[]
-): ytdl.videoFormat[] => {
+  infoFormats: yt.Search.videoFormat[]
+): yt.Search.videoFormat[] => {
   const done_set = new Set();
 
   return ytdl.filterFormats(infoFormats, (filter) => {
@@ -41,9 +41,9 @@ export const getVideoFormats = (
 
 /** filter all video qualities and get a spcific quality (ex: 1080p) */
 export const getVideoFormat = (
-  filteredFormats: ytdl.videoFormat[],
+  filteredFormats: yt.Search.videoFormat[],
   qLabel: yt.QualityLabel | number
-): ytdl.videoFormat => {
+): yt.Search.videoFormat => {
   if (typeof qLabel === "number") {
     qLabel = qLabel.toString() as yt.QualityLabel;
   }
@@ -54,14 +54,14 @@ export const getVideoFormat = (
 
 /** filter the (info.formats) and get all audio formats */
 export const getAudioFormats = (
-  infoFormats: ytdl.videoFormat[]
-): ytdl.videoFormat[] => {
+  infoFormats: yt.Search.videoFormat[]
+): yt.Search.videoFormat[] => {
   const done_set = new Set();
 
   return ytdl
     .filterFormats(infoFormats, (filter) => {
-      const matches = filter.hasAudio && !filter.hasVideo;
-
+      const hasAudioTrackes = filter?.audioTrack?.audioIsDefault ?? true; // to get the original audio track only
+      const matches = filter.hasAudio && !filter.hasVideo && hasAudioTrackes;
       const key = filter.audioBitrate;
       const isAdded = done_set.has(key);
 
@@ -77,9 +77,9 @@ export const getAudioFormats = (
 
 /** to deal with non-founded quality */
 export const getVideoFormat_safe = (
-  formats: ytdl.videoFormat[],
+  formats: yt.Search.videoFormat[],
   quality: yt.VideoQualities
-): ytdl.videoFormat | null => {
+): yt.Search.videoFormat | null => {
   const safe_map = new Map<
     yt.VideoQualities,
     { up: yt.VideoQualities[] | null; down: yt.VideoQualities[] | null }
@@ -138,9 +138,9 @@ export const getVideoFormat_safe = (
 
 /** filter all audio qualities and get a spcific audioBitrate (ex: 160) */
 export const getAudioFormat = (
-  filteredFormats: ytdl.videoFormat[],
+  filteredFormats: yt.Search.videoFormat[],
   bitrate: number
-): ytdl.videoFormat => {
+): yt.Search.videoFormat => {
   return ytdl.chooseFormat(filteredFormats, {
     filter: (filter) => filter?.audioBitrate === bitrate,
   });
@@ -148,9 +148,9 @@ export const getAudioFormat = (
 
 /** to deal with non-founded quality */
 export const getAudioFormat_safe = (
-  formats: ytdl.videoFormat[],
+  formats: yt.Search.videoFormat[],
   quality: yt.AudioQualities
-): ytdl.videoFormat | null => {
+): yt.Search.videoFormat | null => {
   const safe_map = new Map<
     yt.AudioQualities,
     { up: yt.AudioQualities[] | null; down: yt.AudioQualities[] | null }
@@ -393,7 +393,7 @@ export const updateSessionProgress = (
 export const downloadFile = (
   path: string,
   videoInfo: ytdl.videoInfo,
-  format: ytdl.videoFormat,
+  format: yt.Search.videoFormat,
   sessionID: string
 ): Promise<{ ok: boolean }> => {
   return new Promise((resolve) => {
