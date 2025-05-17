@@ -12,7 +12,7 @@ import { agent } from "@/utils/constants";
  */
 export const getVideoFormats = (
   infoFormats: yt.Search.videoFormat[]
-): yt.Search.videoFormat[] => {
+): ytdl.videoFormat[] => {
   const done_set = new Set();
 
   return ytdl.filterFormats(infoFormats, (filter) => {
@@ -60,7 +60,10 @@ export const getAudioFormats = (
 
   return ytdl
     .filterFormats(infoFormats, (filter) => {
-      const hasAudioTrackes = filter?.audioTrack?.audioIsDefault ?? true; // to get the original audio track only
+      const filterWithAudioTracks =
+        filter as yt.Search.videoFormatWithAudioTrack;
+      const hasAudioTrackes =
+        filterWithAudioTracks?.audioTrack?.audioIsDefault ?? true; // to get the original audio track only
       const matches = filter.hasAudio && !filter.hasVideo && hasAudioTrackes;
       const key = filter.audioBitrate;
       const isAdded = done_set.has(key);

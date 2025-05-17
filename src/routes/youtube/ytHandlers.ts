@@ -60,7 +60,7 @@ export const ytSmartSearchHandler = async (
       const videoInfo = await ytdl.getInfo(searchUrl, {
         agent,
       });
-      const formats = videoInfo.formats;
+      const formats = videoInfo.formats as yt.Search.videoFormat[];
 
       // filtered formats
       const filteredVideoFormats = getVideoFormats(formats);
@@ -68,7 +68,7 @@ export const ytSmartSearchHandler = async (
 
       const responseData: yt.Search.SearchResponseData = {
         info: {
-          videoFormats: filteredVideoFormats,
+          videoFormats: filteredVideoFormats as yt.Search.videoFormat[],
           audioFormats: filteredAudioFormats,
           videoDetails: videoInfo.videoDetails,
         },
@@ -295,7 +295,7 @@ export const ytVideoDownloadHandler = async (
     const videoInfo = await ytdl.getInfo(searchUrl, {
       agent,
     });
-    const formats = videoInfo.formats;
+    const formats = videoInfo.formats as yt.Search.videoFormat[];
 
     // filtered formats
     const targetFormat = getVideoFormat_safe(
@@ -467,7 +467,7 @@ export const ytAudioDownloadHandler = async (
     const videoInfo = await ytdl.getInfo(searchUrl, {
       agent,
     });
-    const formats = videoInfo.formats;
+    const formats = videoInfo.formats as yt.Search.videoFormat[];
 
     // filtered formats
     const targetFormat = getAudioFormat_safe(

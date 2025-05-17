@@ -76,15 +76,18 @@ export namespace yt {
       codecs: string;
       videoCodec?: string;
       audioCodec?: string;
+      isLive: boolean;
+      isHLS: boolean;
+      isDashMPD: boolean;
+    }
+
+    type videoFormatWithAudioTrack = videoFormat & {
       audioTrack: {
         displayName: string;
         id: string;
         audioIsDefault: boolean;
       };
-      isLive: boolean;
-      isHLS: boolean;
-      isDashMPD: boolean;
-    }
+    };
 
     type SearchRequestType = Request<any, any, { searchUrl: string }>;
 
