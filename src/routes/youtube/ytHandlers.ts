@@ -97,10 +97,7 @@ export const ytSmartSearchHandler = async (
         }
       }
 
-      const listInfo = await YouTube.getPlaylist(searchUrl, {
-        fetchAll: true,
-        limit: Infinity,
-      });
+      const listInfo = await YouTube.getPlaylist(searchUrl, { fetchAll: true });
 
       const responseData: yt.Search.SearchResponseData = {
         info: {
@@ -125,6 +122,7 @@ export const ytSmartSearchHandler = async (
         // save to cache
         memCache.set(cacheKey, responseData);
       }
+
       response.status(200).json(responseData);
       // invalid url
     } else {
